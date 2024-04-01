@@ -7,10 +7,6 @@ const cleaningRequestSchema = new mongoose.Schema(
       ref: "Property",
       required: true,
     },
-    requestDate: {
-      type: Date,
-      default: Date.now,
-    },
     requesterName: {
       type: String,
       required: true,
@@ -18,6 +14,10 @@ const cleaningRequestSchema = new mongoose.Schema(
     requesterContactInfo: {
       type: String,
       required: true,
+    },
+    requestDate: {
+      type: Date,
+      default: Date.now,
     },
     propertyAddress: {
       type: String,
@@ -28,7 +28,10 @@ const cleaningRequestSchema = new mongoose.Schema(
       required: true,
     },
     devicePhoto: String,
-    additionalNotes: String,
+    additionalNotes: {
+      type: String,
+      default: "",
+    },
     requestStatus: {
       type: String,
       enum: ["Pending", "Completed"],

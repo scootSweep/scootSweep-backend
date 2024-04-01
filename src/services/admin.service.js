@@ -54,22 +54,25 @@ const verifyMail = async (adminData) => {
     throw new ApiError(400, "Invalid OTP");
   }
 
-  const admin = await Admin.findOne({
+
+  let admin = await Admin.findOne({
     email,
   });
 
   if (!admin) {
     throw new ApiError(400, "Invalid email");
   }
-
-  if (admin.mailVerified) {
+  
+  
+  if(admin.isMailVerified) {
     throw new ApiError(400, "Email already verified");
   }
 
-  admin.mailVerified = true;
+  admin.isMailVerified = true;
 
   await admin.save();
 
+  // Now, perform a new query to retrieve the updated admin data without password and refreshToken
   admin = await Admin.findOne({ email }).select("-password -refreshToken");
 
   return admin;
@@ -94,10 +97,9 @@ const loginAdmin = async (adminData) => {
     throw new ApiError(400, "Invalid email or password");
   }
 
-  if (!admin.mailVerified) {
+  if (!admin.isMailVerified) {
     throw new ApiError(400, "Email not verified");
   }
-
   return admin;
 };
 

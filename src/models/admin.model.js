@@ -1,52 +1,56 @@
 import mongoose from "mongoose";
+import jwt from "jsonwebtoken";
 
-const adminSchema = new mongoose.Schema({
-  fullName: {
-    type: String,
-    required: true,
-    trim: true,
-    index: true,
+const adminSchema = new mongoose.Schema(
+  {
+    fullName: {
+      type: String,
+      required: true,
+      trim: true,
+      index: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unquie: true,
+      lowercase: true,
+      trim: true,
+    },
+    role: {
+      type: String,
+      required: true,
+      default: "admin",
+    },
+    isMailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    // administeredProperties: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "Property",
+    // },
+    // accessedRequests: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "CleaningRequest",
+    // },
+    // approvedCleaners: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "Cleaner",
+    // },
+    // handledInvoices: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "CleaningInvoice",
+    // },
+    refreshToken: {
+      type: String,
+    },
   },
-  password: {
-    type: String,
-    required: true,
-  },
-  email: {
-    type: String,
-    required: true,
-    unquie: true,
-    lowercase: true,
-    trim: true,
-  },
-  role: {
-    type: String,
-    required: true,
-    default: "admin",
-  },
-  mobile: {
-    type: String,
-    required: true,
-  },
-  administeredProperties: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Property",
-  },
-  accessedRequests: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "CleaningRequest",
-  },
-  approvedCleaners: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Cleaner",
-  },
-  handledInvoices: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "CleaningInvoice",
-  },
-  refreshToken: {
-    type: String,
-  },
-});
+  { timestamps: true }
+);
 
 adminSchema.methods.generateAccessToken = function () {
   return jwt.sign(
@@ -73,4 +77,4 @@ adminSchema.methods.generateRefreshToken = function () {
   );
 };
 
-export const admin = mongoose.model("Admin", adminSchema);
+export const Admin = mongoose.model("Admin", adminSchema);

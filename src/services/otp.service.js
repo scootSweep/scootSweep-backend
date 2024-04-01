@@ -7,12 +7,17 @@ const client = new twilio(accountSid, authToken);
 
 let OTP, user;
 
-async function sendOtp(number) {
+const generateOtp = () => {
   let digit = "0123456789";
   OTP = "";
   for (let i = 0; i < 4; i++) {
     OTP += digit[Math.floor(Math.random() * 10)];
   }
+  return OTP;
+};
+
+async function sendOtp(number) {
+  generateOtp();
 
   const message = await client.messages.create({
     body: `Your otp verification for user is ${OTP}`,
@@ -140,4 +145,4 @@ function verifyOtp(otp) {
 //   return res.status(200).json(new ApiResponse(200, { otp }, "you are login"));
 // });
 
-export { sendOtp, verifyOtp };
+export { sendOtp, verifyOtp, generateOtp };

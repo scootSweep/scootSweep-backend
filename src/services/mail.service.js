@@ -44,7 +44,7 @@ async function sendEmail(to, subject, template, data) {
 
     return Message;
   } catch (err) {
-    return ApiError(500, "Error while sending email");
+    return err;
   }
 }
 
