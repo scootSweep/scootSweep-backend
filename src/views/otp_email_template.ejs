@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>One-Time Verification Code</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      .logo {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 20%;
+      }
+      .code-container {
+        margin-top: 20px;
+        background-color: #f4f4f4;
+        padding: 10px;
+        border-radius: 5px;
+        text-align: center;
+      }
+      .code {
+        font-size: 24px;
+        font-weight: bold;
+        color: #007bff;
+      }
+      .validity {
+        margin-top: 10px;
+        font-style: italic;
+      }
+      .contact {
+        margin-top: 20px;
+        font-size: 14px;
+      }
+      .footer {
+        margin-top: 20px;
+        font-size: 14px;
+        font-style: italic;
+      }
+      .content {
+        margin-top: 20px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <img
+        class="logo"
+        src="https://images.pexels.com/photos/225406/pexels-photo-225406.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+        alt="Company Logo"
+      />
+      <div class="content">
+        <p>Here is a one-time verification code for your use:</p>
+        <div class="code-container">
+          <p>
+            Your Verification code:<br />
+            <span class="code"><%= otp %></span>
+          </p>
+          <p class="validity">Valid for: <strong><%= validity %></strong></p>
+        </div>
+      </div>
+      <div class="contact">
+        <p>
+          Reach out to us at
+          <a href="mailto:support@example.com">support@example.com</a> if you
+          have not tried to sign up/in.
+        </p>
+      </div>
+      <div class="footer">
+        <p>Thank you,</p>
+        <p><%= companyName %></p>
+      </div>
+    </div>
+  </body>
+</html>
