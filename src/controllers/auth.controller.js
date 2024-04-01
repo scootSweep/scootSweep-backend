@@ -2,10 +2,15 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { Property } from "../models/property.model.js";
-import { sendOtp, verifyOtp } from "../services/otp.service.js";
+import { sendOtp } from "../services/otp.service.js";
 import propertyService from "../services/property.service.js";
 import cleanerService from "../services/cleaner.service.js";
 import { Cleaner } from "../models/cleaner.model.js";
+import { Admin } from "../models/admin.model.js";
+import { sendEmail } from "../services/mail.service.js";
+import { generateOtp } from "../services/otp.service.js";
+
+import adminService from "../services/admin.service.js";
 
 // Options for setting cookies
 const cookieOptions = {
@@ -82,6 +87,26 @@ const loginProperty = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, { accessToken, refreshToken }, "you are login"));
 });
 
+const logoutProperty = asyncHandler(async (req, res) => {
+  await Property.findByIdAndUpdate(
+    req.property._id,
+    {
+      $unset: {
+        refreshToken: 1,
+      },
+    },
+    {
+      new: true,
+    }
+  );
+
+  return res
+    .status(200)
+    .clearCookie("accessToken", cookieOptions)
+    .clearCookie("refreshToken", cookieOptions)
+    .json(new ApiResponse(200, {}, "property logged out"));
+});
+
 // Cleaner-Auth
 // src/controllers/auth.controller.js
 
@@ -143,12 +168,144 @@ const loginCleaner = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, { accessToken, refreshToken }, "you are login"));
 });
 
+const logoutCleaner = asyncHandler(async (req, res) => {
+  await Cleaner.findByIdAndUpdate(
+    req.cleaner._id,
+    {
+      $unset: {
+        refreshToken: 1,
+      },
+    },
+    {
+      new: true,
+    }
+  );
+
+  return res
+    .status(200)
+    .clearCookie("accessToken", cookieOptions)
+    .clearCookie("refreshToken", cookieOptions)
+    .json(new ApiResponse(200, {}, "cleaner logged out"));
+});
+
+// admin-Auth
+
+const sendOtptoMail = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    throw new ApiError(400, "Email is required");
+  }
+  const otp = generateOtp();
+
+  if (!otp) {
+    throw new ApiError(500, "error while sending otp");
+  }
+
+  const data = {
+    otp,
+    validity: "10 minutes",
+    companyName: "Cleanex",
+  };
+
+  const mail = await sendEmail(
+    email,
+    "OTP for Email Verification",
+    "otp_email_template",
+    data
+  );
+
+  if (!mail) {
+    throw new ApiError(500, "error while sending otp");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, mail, ` ${otp} otp sent successfully`));
+});
+
+const generatorAccessAndRefreshTokenForAdmin = async (adminId) => {
+  try {
+    const admin = await Admin.findById(adminId);
+    if (!admin) {
+      throw new Error("Property not found");
+    }
+
+    const accessToken = admin.generateAccessToken();
+    const refreshToken = admin.generateRefreshToken();
+
+    admin.refreshToken = refreshToken;
+    await admin.save({ validateBeforeSave: false });
+
+    return { accessToken, refreshToken };
+  } catch (error) {
+    throw new ApiError(
+      500,
+      "Something went wrong while generating Access and Refresh tokens"
+    );
+  }
+};
+
+const registerAdmin = asyncHandler(async (req, res) => {
+  const admin = await adminService.createAdmin(req.body);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, admin, "Admin created successfully"));
+});
+
+const verifyEmail = asyncHandler(async (req, res) => {
+  await adminService.verifyMail(req.body);
+
+  return res.status(200).json(new ApiResponse(200, "admin number is verified"));
+});
+
+const loginAdmin = asyncHandler(async (req, res) => {
+  const admin = await adminService.loginAdmin(req.body);
+
+  const { accessToken, refreshToken } =
+    await generatorAccessAndRefreshTokenForAdmin(admin._id);
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
+    .json(new ApiResponse(200, { accessToken, refreshToken }, "you are login"));
+});
+
+const logoutAdmin = asyncHandler(async (req, res) => {
+  await Admin.findByIdAndUpdate(
+    req.admin._id,
+    {
+      $unset: {
+        refreshToken: 1,
+      },
+    },
+    {
+      new: true,
+    }
+  );
+
+  return res
+    .status(200)
+    .clearCookie("accessToken", cookieOptions)
+    .clearCookie("refreshToken", cookieOptions)
+    .json(new ApiResponse(200, {}, "admin logged out"));
+});
+
 export {
   sendOtpToContact,
   registerProperty,
   registerCleaner,
-  loginProperty,
   verifyPropertyContact,
+  loginProperty,
+  logoutProperty,
   verifyCleanerContact,
   loginCleaner,
+  logoutCleaner,
+  sendOtptoMail,
+  registerAdmin,
+  verifyEmail,
+  loginAdmin,
+  logoutAdmin,
 };
