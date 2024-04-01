@@ -54,6 +54,7 @@ const verifyMail = async (adminData) => {
     throw new ApiError(400, "Invalid OTP");
   }
 
+
   let admin = await Admin.findOne({
     email,
   });
@@ -61,8 +62,9 @@ const verifyMail = async (adminData) => {
   if (!admin) {
     throw new ApiError(400, "Invalid email");
   }
-
-  if (admin.isMailVerified) {
+  
+  
+  if(admin.isMailVerified) {
     throw new ApiError(400, "Email already verified");
   }
 
@@ -98,7 +100,6 @@ const loginAdmin = async (adminData) => {
   if (!admin.isMailVerified) {
     throw new ApiError(400, "Email not verified");
   }
-
   return admin;
 };
 

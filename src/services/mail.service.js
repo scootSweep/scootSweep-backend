@@ -21,7 +21,6 @@ async function sendEmail(to, subject, template, data) {
     //   { async: true }
     // );
 
-    console.log("Template:", template);
     const html = await ejs.renderFile(
       "/Users/achint/Desktop/project-backend/src/views/" + template + ".ejs",
       data,
