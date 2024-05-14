@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cleaning Request</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+
+      .container {
+        width: 70%;
+        margin: 20px auto;
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        padding: 20px;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .header h1 {
+        font-size: 24px;
+      }
+
+      .details p {
+        margin: 5px 0;
+        font-size: 18px;
+      }
+
+      .fee p {
+        font-size: 20px;
+        margin: 10px 0;
+      }
+
+      .fee a {
+        font-size: 18px;
+        color: blue;
+        text-decoration: none;
+      }
+
+      .image img {
+        width: 100%;
+        height: auto;
+        margin-top: 10px;
+      }
+
+      .location iframe {
+        width: 100%;
+        height: 300px;
+        border: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Cleaning Request Details</h1>
+      <div class="details">
+        <p><strong>Requester Name:</strong> <%= requesterName %></p>
+        <p><strong>Contact Info:</strong> <%= requesterContactInfo %></p>
+        <p><strong>Property Address:</strong> <%= propertyAddress %></p>
+        <p><strong>GPS Location:</strong> <%= gpsLocation %></p>
+        <p><strong>Additional Notes:</strong> <%= additionalNotes %></p>
+        <p><strong>Request Status:</strong> <%= requestStatus %></p>
+        <p><strong>Request Date:</strong> <%= requestDate %></p>
+      </div>
+      <div class="image">
+        <p><strong>Device Photo:</strong></p>
+        <img src="<%=devicePhoto %>" alt="Device Photo" />
+      </div>
+    </div>
+  </body>
+</html>
