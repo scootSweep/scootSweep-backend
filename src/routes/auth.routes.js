@@ -27,7 +27,7 @@ const router = Router();
 router.route("/send-otp").post(sendOtpToContact);
 
 // property-routes
-router.route("/register/property").post(registerProperty);
+router.route("/register/property").post(upload.none(), registerProperty);
 router.route("/verify-otp/property").post(verifyPropertyContact);
 router.route("/login/property").post(loginProperty);
 router.route("/logout/property").post(verifyProperty, logoutProperty);
