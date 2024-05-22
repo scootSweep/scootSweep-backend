@@ -102,7 +102,9 @@ const login = async (details) => {
     throw new ApiError(400, "Invalid otp");
   }
 
-  const cleaner = await Cleaner.findOne({ phone: number });
+  const cleaner = await Cleaner.findOne({ phone: number }).select(
+    "-refreshToken"
+  );
 
   if (!cleaner) {
     throw new ApiError(404, "Cleaner not found");

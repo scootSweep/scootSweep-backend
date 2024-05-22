@@ -84,7 +84,17 @@ const loginProperty = asyncHandler(async (req, res) => {
     .status(200)
     .cookie("accessToken", accessToken, cookieOptions)
     .cookie("refreshToken", refreshToken, cookieOptions)
-    .json(new ApiResponse(200, { accessToken, refreshToken }, "you are login"));
+    .json(
+      new ApiResponse(
+        200,
+        {
+          property: property,
+          accessToken,
+          refreshToken,
+        },
+        "you are login"
+      )
+    );
 });
 
 const logoutProperty = asyncHandler(async (req, res) => {
@@ -165,7 +175,13 @@ const loginCleaner = asyncHandler(async (req, res) => {
     .status(200)
     .cookie("accessToken", accessToken, cookieOptions)
     .cookie("refreshToken", refreshToken, cookieOptions)
-    .json(new ApiResponse(200, { accessToken, refreshToken }, "you are login"));
+    .json(
+      new ApiResponse(
+        200,
+        { cleaner: cleaner, accessToken, refreshToken },
+        "you are login"
+      )
+    );
 });
 
 const logoutCleaner = asyncHandler(async (req, res) => {

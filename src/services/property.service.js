@@ -118,7 +118,9 @@ const login = async (details) => {
   if (!verifyOtp(otp)) {
     throw new ApiError(300, "otp is not correct");
   }
-  const property = await Property.findOne({ phone: number });
+  const property = await Property.findOne({ phone: number }).select(
+    "-refreshToken"
+  );
 
   if (!property) {
     throw new ApiError(404, "Property not found");
