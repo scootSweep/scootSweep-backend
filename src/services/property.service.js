@@ -14,26 +14,29 @@ const createProperty = async (propertyData) => {
     lastName,
     role,
     email,
+    signature,
     phone,
   } = propertyData;
 
   const requiredFields = [
-    propertyName,
-    propertyAddress,
-    gpsLocation,
-    firstName,
-    lastName,
-    role,
-    email,
-    phone,
+    { name: "propertyName", value: propertyName },
+    { name: "propertyAddress", value: propertyAddress },
+    { name: "gpsLocation", value: gpsLocation },
+    { name: "firstName", value: firstName },
+    { name: "lastName", value: lastName },
+    { name: "role", value: role },
+    { name: "email", value: email },
+    { name: "signature", value: signature },
+    { name: "phone", value: phone },
   ];
 
-  const missingField = requiredFields.some(
-    (field) => field === undefined || field?.trim() === ""
+  // Find the first missing field and throw an error if any field is missing
+  const missingField = requiredFields.find(
+    (field) => field.value === undefined || field.value.trim() === ""
   );
 
   if (missingField) {
-    throw new ApiError(400, `Field ${missingField} is required`);
+    throw new ApiError(400, `Field ${missingField.name} is required`);
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -59,6 +62,7 @@ const createProperty = async (propertyData) => {
     lastName,
     role,
     email,
+    signature,
     phone,
     phoneVerified: false,
   });

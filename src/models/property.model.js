@@ -33,6 +33,10 @@ const propertySchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    signature: {
+      type: String,
+      require: true,
+    },
     phone: {
       type: String,
       required: true,
