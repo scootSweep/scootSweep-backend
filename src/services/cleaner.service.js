@@ -8,8 +8,21 @@ import { verifyOtp } from "../services/otp.service.js";
 const createCleaner = async (cleanerData, localImageID) => {
   const { firstName, lastName, email, phone, DOB } = cleanerData;
 
-  if (!firstName || !lastName || !email || !phone || !DOB) {
-    throw new ApiError(400, "All fields are required");
+  const requiredFields = [
+    { name: "firstName", value: firstName },
+    { name: "lastName", value: lastName },
+    { name: "email", value: email },
+    { name: "phone", value: phone },
+    { name: "DOB", value: DOB },
+  ];
+
+  // Find the first missing field and throw an error if any field is missing
+  const missingField = requiredFields.find(
+    (field) => field.value === undefined || field.value.trim() === ""
+  );
+
+  if (missingField) {
+    throw new ApiError(400, `Field ${missingField.name} is required`);
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
