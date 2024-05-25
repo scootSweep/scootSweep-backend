@@ -1,6 +1,13 @@
 import { ApiError } from "../utils/ApiError.js";
 import nodemailer from "nodemailer";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 import ejs from "ejs";
+
+// Convert the URL of the current module (import.meta.url) to a file path
+const __filename = fileURLToPath(import.meta.url);
+// Extract the directory name from the file path
+const __dirname = dirname(__filename);
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -12,22 +19,15 @@ const transporter = nodemailer.createTransport({
 
 async function sendEmail(to, subject, template, data) {
   try {
-    // console.log("__dirname:", __dirname);
-    // console.log("Render file path:", __dirname + "/views/" + template + ".ejs");
+    // Construct the path to the EJS template file
+    const templatePath = join(__dirname, "../views/" + template + ".ejs");
 
-    // const html = await renderFile(
-    //   __dirname + "/views/" + template + ".ejs",
-    //   data,
-    //   { async: true }
-    // );
+    // Render the EJS template file with the provided data
+    const html = await ejs.renderFile(templatePath, data, {
+      async: true,
+    });
 
-    const html = await ejs.renderFile(
-      "/Users/achint/Desktop/project-backend/src/views/" + template + ".ejs",
-      data,
-      {
-        async: true,
-      }
-    );
+    console.log("html", html);
 
     if (!html) {
       throw new ApiError(500, "Error while rendering email template");
