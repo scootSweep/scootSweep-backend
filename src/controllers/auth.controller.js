@@ -69,7 +69,17 @@ const registerProperty = asyncHandler(async (req, res) => {
 });
 
 const verifyPropertyContact = asyncHandler(async (req, res) => {
-  await propertyService.verifyContact(req.body);
+  const property = await propertyService.verifyContact(req.body);
+
+  const mail = await sendEmail(
+    property.email,
+    "Property Registration",
+    "property_registration_template",
+    property
+  );
+  if (!mail) {
+    throw new ApiError(500, "error while sending email");
+  }
 
   return res.status(200).json(new ApiResponse(200, "number is verified"));
 });
@@ -143,14 +153,14 @@ const generatorAccessAndRefreshTokenForCleaner = async (cleanerId) => {
 };
 
 const registerCleaner = asyncHandler(async (req, res) => {
-  if (!req.file) {
-    throw new ApiError(400, "ID image is required");
-  }
-  const image = req.file.path;
-  if (!image) {
-    throw new ApiError(400, "ID image is required");
-  }
-  const cleaner = await cleanerService.createCleaner(req.body, image);
+  // if (!req.file) {
+  //   throw new ApiError(400, "ID image is required");
+  // }
+  // const image = req.file.path;
+  // if (!image) {
+  //   throw new ApiError(400, "ID image is required");
+  // }
+  const cleaner = await cleanerService.createCleaner(req.body);
 
   return res
     .status(200)
