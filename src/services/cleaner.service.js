@@ -3,10 +3,15 @@ import { Cleaner } from "../models/cleaner.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { isValidPhoneNumber } from "../utils/validation.js";
 import { verifyOtp } from "../services/otp.service.js";
+import fs from "fs";
+import { fileURLToPath } from "url";
+import path from "path";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // src/services/cleaner.service.js
-const createCleaner = async (cleanerData, localImageID) => {
-  const { firstName, lastName, email, phone, DOB } = cleanerData;
+const createCleaner = async (cleanerData) => {
+  const { firstName, lastName, email, phone, DOB, idImage } = cleanerData;
 
   const requiredFields = [
     { name: "firstName", value: firstName },
@@ -25,6 +30,20 @@ const createCleaner = async (cleanerData, localImageID) => {
     throw new ApiError(400, `Field ${missingField.name} is required`);
   }
 
+  const buffer = Buffer.from(idImage, "base64");
+  // if (!buffer) {
+  //   throw new ApiError(400, "Invalid signature");
+  // }
+
+  const tempFilePath = path.join(__dirname, "temp_image.jpg");
+  fs.writeFileSync(tempFilePath, buffer);
+
+  const Image = await uploadOnCloudinary(tempFilePath);
+
+  // if (!Image) {
+  //   throw new ApiError(500, "Error while uploading ID image");
+  // }
+
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     throw new ApiError(400, "Invalid email format");
@@ -42,12 +61,6 @@ const createCleaner = async (cleanerData, localImageID) => {
     throw new ApiError(400, "Invalid date of birth");
   }
 
-  const idImage = await uploadOnCloudinary(localImageID);
-
-  if (!idImage) {
-    throw new ApiError(500, "Error while uploading ID image");
-  }
-
   const cleaner = await Cleaner.create({
     firstName,
     lastName,
@@ -55,9 +68,13 @@ const createCleaner = async (cleanerData, localImageID) => {
     email,
     phone,
     phoneVerified: false,
-    idImage: idImage.url,
+    idImage: Image ? Image.url : "",
     approved: false,
   });
+
+  if (fs.existsSync(tempFilePath)) {
+    fs.unlinkSync(tempFilePath);
+  }
 
   if (!cleaner) {
     throw new ApiError(500, "Error while creating cleaner");
