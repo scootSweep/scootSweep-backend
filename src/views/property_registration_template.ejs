@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Property Details</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap");
+
+      body {
+        font-family: "Roboto", sans-serif;
+        background-color: #f9f9f9;
+        color: #333;
+        margin: 0;
+        padding: 0;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 20px;
+        background: linear-gradient(145deg, #ffffff, #e6e6e6);
+        border-radius: 15px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s;
+      }
+
+      .container:hover {
+        transform: scale(1.02);
+      }
+
+      h1 {
+        text-align: center;
+        color: #2c3e50;
+        font-size: 2.5em;
+        margin-bottom: 20px;
+        letter-spacing: 1px;
+      }
+
+      .property-info,
+      .manager-info,
+      .metadata {
+        background: #fff;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .property-info h2,
+      .manager-info h2 {
+        color: #34495e;
+        font-size: 1.5em;
+        margin-bottom: 10px;
+        border-bottom: 2px solid #ecf0f1;
+        padding-bottom: 5px;
+      }
+
+      p {
+        margin: 10px 0;
+        font-size: 1.1em;
+      }
+
+      strong {
+        color: #7f8c8d;
+      }
+
+      a {
+        color: #3498db;
+        text-decoration: none;
+        transition: color 0.3s;
+      }
+
+      a:hover {
+        color: #2980b9;
+        text-decoration: underline;
+      }
+
+      .signature {
+        display: block;
+        margin-top: 10px;
+        max-width: 100%;
+        height: auto;
+        border: 2px solid #bdc3c7;
+        border-radius: 5px;
+      }
+
+      .metadata {
+        font-size: 0.9em;
+        color: #7f8c8d;
+        text-align: center;
+      }
+    </style>
+    <!-- <link rel="stylesheet" href="/styles.css" /> -->
+  </head>
+  <body>
+    <div class="container">
+      <h1>Property Details</h1>
+      <div class="property-info">
+        <h2>Property Name: <%= propertyName %></h2>
+        <p><strong>Address:</strong> <%= propertyAddress %></p>
+        <p><strong>GPS Location:</strong> <%= gpsLocation %></p>
+      </div>
+      <div class="manager-info">
+        <h2>Manager Details</h2>
+        <p><strong>First Name:</strong> <%= firstName %></p>
+        <p><strong>Last Name:</strong> <%= lastName %></p>
+        <p><strong>Role:</strong> <%= role %></p>
+        <p>
+          <strong>Email:</strong> <a href="mailto:<%= email %>"><%= email %></a>
+        </p>
+        <p><strong>Phone:</strong> <%= phone %></p>
+        <p>
+          <strong>Phone Verified:</strong> <%= phoneVerified ? 'Yes' : 'No' %>
+        </p>
+        <img src="<%= signature %>" alt="Signature" class="signature" />
+      </div>
+      <div class="metadata">
+        <p><strong>Created At:</strong> <%= createdAt %></p>
+        <p><strong>Updated At:</strong> <%= updatedAt %></p>
+        <p><strong>ID:</strong> <%= _id %></p>
+      </div>
+    </div>
+  </body>
+</html>
