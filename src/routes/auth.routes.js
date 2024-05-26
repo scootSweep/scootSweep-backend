@@ -33,13 +33,15 @@ router.route("/login/property").post(loginProperty);
 router.route("/logout/property").post(verifyProperty, logoutProperty);
 
 // cleaner-routes
-router.route("/register/cleaner").post(
-  upload.single("idImage"), // Use upload.single middleware for single file uploads with the field name "idImage"
-  (req, res, next) => {
-    next();
-  },
-  registerCleaner
-);
+// router.route("/register/cleaner").post(
+//   upload.single("idImage"), // Use upload.single middleware for single file uploads with the field name "idImage"
+//   (req, res, next) => {
+//     next();
+//   },
+//   registerCleaner
+// );
+
+router.route("/register/cleaner").post(upload.none(), registerCleaner);
 router.route("/verify-otp/cleaner").post(verifyCleanerContact);
 router.route("/login/cleaner").post(loginCleaner);
 router.route("/logout/cleaner").post(verifyCleaner, logoutCleaner);
