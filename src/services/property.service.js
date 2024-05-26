@@ -1,9 +1,13 @@
 import { ApiError } from "../utils/ApiError.js";
-import { ApiResponse } from "../utils/ApiResponse.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { Property } from "../models/property.model.js";
 import { verifyOtp } from "../services/otp.service.js";
 import { isValidPhoneNumber } from "../utils/validation.js";
+import fs from "fs";
+import { fileURLToPath } from "url";
+import path from "path";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const createProperty = async (propertyData) => {
   const {
@@ -39,6 +43,19 @@ const createProperty = async (propertyData) => {
     throw new ApiError(400, `Field ${missingField.name} is required`);
   }
 
+  const buffer = Buffer.from(signature, "base64");
+  if (!buffer) {
+    throw new ApiError(400, "Invalid signature");
+  }
+
+  const tempFilePath = path.join(__dirname, "temp_image.jpg");
+  fs.writeFileSync(tempFilePath, buffer);
+
+  const idImage = await uploadOnCloudinary(tempFilePath);
+  if (!idImage) {
+    throw new ApiError(500, "Error while uploading signation");
+  }
+
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     throw new ApiError(400, "Invalid email format");
@@ -62,10 +79,14 @@ const createProperty = async (propertyData) => {
     lastName,
     role,
     email,
-    signature,
+    signature: idImage.url,
     phone,
     phoneVerified: false,
   });
+
+  if (fs.existsSync(tempFilePath)) {
+    fs.unlinkSync(tempFilePath);
+  }
 
   if (!property) {
     throw new ApiError(500, "Some went wrong while registering the property");
