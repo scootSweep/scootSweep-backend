@@ -26,7 +26,7 @@ const propertySchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["owner", "manager", "resident"],
+      enum: ["owner", "manager", "resident", "Owner", "Manager", "Resident"],
       required: true,
     },
     email: {
