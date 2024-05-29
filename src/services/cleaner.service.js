@@ -1,8 +1,11 @@
 import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 import { Cleaner } from "../models/cleaner.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { isValidPhoneNumber } from "../utils/validation.js";
 import { verifyOtp } from "../services/otp.service.js";
+import { Property } from "../models/property.model.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import path from "path";
@@ -143,10 +146,25 @@ const login = async (details) => {
   return cleaner;
 };
 
+const getAllPropertyLocation = asyncHandler(async (req, res) => {
+  const properties = await Property.find().select(
+    "-email -signature -phoneVerified -refreshToken "
+  );
+
+  if (!properties) {
+    throw new ApiError(404, "Properties not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, properties, "Properties found"));
+});
+
 const cleanerService = {
   createCleaner,
   verifyContact,
   login,
+  getAllPropertyLocation,
 };
 
 export default cleanerService;
