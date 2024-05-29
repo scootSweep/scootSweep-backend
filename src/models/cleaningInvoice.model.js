@@ -9,6 +9,12 @@ const cleaningInvoiceSchema = new mongoose.Schema(
     },
     reason: {
       type: String,
+      enum: [
+        "Unauthorized Parking",
+        "Private Property",
+        "unauthorized parking",
+        "private property",
+      ],
       required: true,
     },
     issueDate: {
