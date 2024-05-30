@@ -24,6 +24,10 @@ const propertySchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    userType: {
+      type: Number,
+      default: 1,
+    },
     role: {
       type: String,
       enum: ["owner", "manager", "resident", "Owner", "Manager", "Resident"],
