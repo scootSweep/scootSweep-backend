@@ -182,6 +182,30 @@ const getPropertyById = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, property, "property retrieved successfully"));
 });
 
+const getAllCleaner = asyncHandler(async (req, res) => {
+  const cleaner = await Cleaner.find({});
+  if (!cleaner) {
+    throw new ApiError(404, "No cleaner found");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, cleaner, "Cleaner found successfully"));
+});
+
+const getCleanerById = asyncHandler(async (req, res) => {
+  const { cleanerId } = req.params;
+  if (!cleanerId.trim()) {
+    throw new ApiError(400, "Cleaner id is required");
+  }
+  const cleaner = await Cleaner.findById(cleanerId);
+  if (!cleaner) {
+    throw new ApiError(404, `Cleaner with id ${cleanerId} not found`);
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, cleaner, "Cleaner retrieved successfully"));
+});
+
 export {
   // registerCleanerbyAdmin,
   getAllCleaningRequests,
@@ -190,4 +214,6 @@ export {
   deleteCleaningRequest,
   getAllProperty,
   getPropertyById,
+  getAllCleaner,
+  getCleanerById,
 };
