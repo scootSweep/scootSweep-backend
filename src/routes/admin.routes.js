@@ -16,13 +16,7 @@ import { upload } from "../middlewares/multer.middleware.js";
 const router = Router();
 router.use(verifyAdmin);
 
-router.route("/register/cleaner").post(
-  upload.single("idImage"), // Use upload.single middleware for single file uploads with the field name "idImage"
-  (req, res, next) => {
-    next();
-  },
-  registerCleaner
-);
+router.route("/register/cleaner").post(upload.none(), registerCleaner);
 
 router.route("/cleaning_requests").get(getAllCleaningRequests);
 router
