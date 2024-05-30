@@ -11,6 +11,10 @@ const cleanerSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    userType: {
+      type: Number,
+      default: 0,
+    },
     dateOfBirth: Date,
     isAvailable: {
       type: Boolean,
