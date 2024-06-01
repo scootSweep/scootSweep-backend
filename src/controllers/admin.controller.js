@@ -7,7 +7,7 @@ import { Cleaner } from "../models/cleaner.model.js";
 import { ContactInfo } from "../models/contactInfo.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { isValidPhoneNumber } from "../utils/validation.js";
-import { sendEmail } from "../services/mail.service.js";
+import { isValidObjectId } from "mongoose";
 
 const registerCleanerbyAdmin = asyncHandler(async (req, res) => {
   const { firstName, lastName, email, phone, DOB } = req.body;
@@ -261,6 +261,11 @@ const getAllContactInfo = asyncHandler(async (req, res) => {
 
 const deleteContactInfo = asyncHandler(async (req, res) => {
   const { contactInfoId } = req.params;
+
+  if (!isValidObjectId(contactInfoId)) {
+    throw new ApiError(400, "Contact info id is required");
+  }
+
   const contactInfo = await ContactInfo.findByIdAndDelete(contactInfoId);
   if (!contactInfo) {
     throw new ApiError(404, `Contact info with id ${contactInfoId} not found`);
