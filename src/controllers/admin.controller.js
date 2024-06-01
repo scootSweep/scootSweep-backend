@@ -4,59 +4,62 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { CleaningRequest } from "../models/cleaningRequest.model.js";
 import { Property } from "../models/property.model.js";
 import { Cleaner } from "../models/cleaner.model.js";
-import { sendEmail } from "../services/mail.service.js";
+import { ContactInfo } from "../models/contactInfo.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { isValidPhoneNumber } from "../utils/validation.js";
+import { sendEmail } from "../services/mail.service.js";
 
-// const registerCleanerbyAdmin = async (cleanerData, localImageID) => {
-// const registerCleanerbyAdmin = asyncHandler(async (req, res) => {
-//   const { firstName, lastName, email, phone, DOB } = req.body;
+const registerCleanerbyAdmin = asyncHandler(async (req, res) => {
+  const { firstName, lastName, email, phone, DOB } = req.body;
 
-//   if (!firstName || !lastName || !email || !phone || !DOB) {
-//     throw new ApiError(400, "All fields are required");
-//   }
+  if (!firstName || !lastName || !email || !phone || !DOB) {
+    throw new ApiError(400, "All fields are required");
+  }
 
-//   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-//   if (!emailRegex.test(email)) {
-//     throw new ApiError(400, "Invalid email format");
-//   }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    throw new ApiError(400, "Invalid email format");
+  }
 
-//   if (!isValidPhoneNumber(phone)) {
-//     throw new ApiError(400, "Invalid phone number");
-//   }
+  if (!isValidPhoneNumber(phone)) {
+    throw new ApiError(400, "Invalid phone number");
+  }
 
-//   const [day, month, year] = DOB.split("-");
-//   const dateOfBirth = new Date(`${month}-${day}-${year}`);
+  const [day, month, year] = DOB.split("-");
+  const dateOfBirth = new Date(`${month}-${day}-${year}`);
 
-//   // Check if the dateOfBirth is valid
-//   if (isNaN(dateOfBirth.getTime())) {
-//     throw new ApiError(400, "Invalid date of birth");
-//   }
+  // Check if the dateOfBirth is valid
+  if (isNaN(dateOfBirth.getTime())) {
+    throw new ApiError(400, "Invalid date of birth");
+  }
+  if (req.file === undefined) {
+    throw new ApiError(400, "ID image is required");
+  }
+  const image = await uploadOnCloudinary(req.file.path);
 
-//   const idImage = await uploadOnCloudinary(req.file.path);
+  if (!image) {
+    throw new ApiError(500, "Error while uploading ID image");
+  }
 
-//   if (!idImage) {
-//     throw new ApiError(500, "Error while uploading ID image");
-//   }
+  const cleaner = await Cleaner.create({
+    firstName,
+    lastName,
+    dateOfBirth: dateOfBirth,
+    email,
+    phone,
+    phoneVerified: false,
+    idImage: image.url,
+    approved: false,
+  });
 
-//   const cleaner = await Cleaner.create({
-//     firstName,
-//     lastName,
-//     dateOfBirth: dateOfBirth,
-//     email,
-//     phone,
-//     phoneVerified: false,
-//     idImage: idImage.url,
-//     approved: false,
-//   });
+  if (!cleaner) {
+    throw new ApiError(500, "Error while creating cleaner");
+  }
 
-//   if (!cleaner) {
-//     throw new ApiError(500, "Error while creating cleaner");
-//   }
-
-//   return res
-//     .status(200)
-//     .json(new ApiResponse(200, cleaner, "Cleaner registered successfully"));
-// });
+  return res
+    .status(200)
+    .json(new ApiResponse(200, cleaner, "Cleaner registered successfully"));
+});
 
 const getAllCleaningRequests = asyncHandler(async (req, res) => {
   const cleaningRequests = await CleaningRequest.find().populate("property");
@@ -206,8 +209,71 @@ const getCleanerById = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, cleaner, "Cleaner retrieved successfully"));
 });
 
+const createContactInfo = asyncHandler(async (req, res) => {
+  const { companyName, firstName, lastName, title, email, secondaryEmail } =
+    req.body;
+
+  const requiredFields = [
+    { name: "companyName", value: companyName },
+    { name: "firstName", value: firstName },
+    { name: "lastName", value: lastName },
+    { name: "title", value: title },
+    { name: "email", value: email },
+  ];
+
+  // Find the first missing field and throw an error if any field is missing
+  const missingField = requiredFields.find(
+    (field) => field.value === undefined || field.value.trim() === ""
+  );
+
+  if (missingField) {
+    throw new ApiError(400, `Field ${missingField.name} is required`);
+  }
+
+  const contactInfo = await ContactInfo.create({
+    companyName,
+    firstName,
+    lastName,
+    title,
+    email,
+    secondaryEmail,
+  });
+
+  if (!contactInfo) {
+    throw new ApiError(500, "Error while creating contact info");
+  }
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, contactInfo, "Contact info created successfully")
+    );
+});
+
+const getAllContactInfo = asyncHandler(async (req, res) => {
+  const contactInfo = await ContactInfo.find({});
+  if (!contactInfo) {
+    throw new ApiError(404, "No contact info found");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, contactInfo, "Contact info found successfully"));
+});
+
+const deleteContactInfo = asyncHandler(async (req, res) => {
+  const { contactInfoId } = req.params;
+  const contactInfo = await ContactInfo.findByIdAndDelete(contactInfoId);
+  if (!contactInfo) {
+    throw new ApiError(404, `Contact info with id ${contactInfoId} not found`);
+  }
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, contactInfo, "Contact info deleted successfully")
+    );
+});
+
 export {
-  // registerCleanerbyAdmin,
+  registerCleanerbyAdmin,
   getAllCleaningRequests,
   getCleaningRequestById,
   updateCleaningRequest,
@@ -216,4 +282,7 @@ export {
   getPropertyById,
   getAllCleaner,
   getCleanerById,
+  createContactInfo,
+  getAllContactInfo,
+  deleteContactInfo,
 };
