@@ -230,6 +230,16 @@ const createContactInfo = asyncHandler(async (req, res) => {
     throw new ApiError(400, `Field ${missingField.name} is required`);
   }
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    throw new ApiError(400, "Invalid email format");
+  }
+
+  const existingEmail = await ContactInfo.findOne({ email: email });
+
+  if (existingEmail) {
+    throw new ApiError(400, "Email already exists");
+  }
   const contactInfo = await ContactInfo.create({
     companyName,
     firstName,
