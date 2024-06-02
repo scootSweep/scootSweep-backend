@@ -147,9 +147,7 @@ const login = async (details) => {
 };
 
 const getAllPropertyLocation = asyncHandler(async (req, res) => {
-  const properties = await Property.find().select(
-    "-email -signature -phoneVerified -refreshToken "
-  );
+  const properties = await Property.find().select("-refreshToken ");
 
   if (!properties) {
     throw new ApiError(404, "Properties not found");
