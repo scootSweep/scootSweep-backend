@@ -53,6 +53,10 @@ const cleaningInvoiceSchema = new mongoose.Schema(
     paymentDate: Date,
     paymentAmount: Number,
     additionalNotes: String,
+    invoiceNumber: {
+      type: Number,
+      required: true,
+    },
   },
   { timestamps: true }
 );
