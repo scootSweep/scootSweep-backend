@@ -27,8 +27,6 @@ async function sendEmail(to, subject, template, data) {
       async: true,
     });
 
-    console.log("html", html);
-
     if (!html) {
       throw new ApiError(500, "Error while rendering email template");
     }
