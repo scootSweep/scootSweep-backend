@@ -27,6 +27,7 @@ async function sendEmail(to, subject, template, data) {
 
     const templatePath = join(__dirname, "../views/" + template + ".ejs");
 
+    console.log("templatePath", templatePath);
     // Render the EJS template file with the provided data
     const html = await ejs.renderFile(templatePath, data, {
       async: true,
