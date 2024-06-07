@@ -1,13 +1,63 @@
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { CleaningRequest } from "../models/cleaningRequest.model.js";
+import { CleaningInvoice } from "../models/cleaningInvoice.model.js";
 import { Property } from "../models/property.model.js";
 import { Cleaner } from "../models/cleaner.model.js";
 import { ContactInfo } from "../models/contactInfo.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { isValidPhoneNumber } from "../utils/validation.js";
 import { isValidObjectId } from "mongoose";
+
+const Dashboard = asyncHandler(async (req, res) => {
+  // calculate the statistics like number of Cleaning Invoice, number of properties, number of cleaners, number of verified phone number for properties. using mongo aggregate
+
+  // cal the number of Cleaning Invoice with status pending with count of totalCleaningInvoice
+
+  const totalCleaningInvoice = await CleaningInvoice.aggregate([
+    {
+      $match: {
+        invoiceStatus: "Pending",
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        totalCleaningInvoice: { $sum: 1 },
+      },
+    },
+  ]);
+
+  // number of properties, number of cleaners, number of verified phone number for properties
+  const totalProperties = await Property.countDocuments({});
+  const totalCleaners = await Cleaner.countDocuments({});
+  const verifiedProperties = await Property.aggregate([
+    {
+      $match: {
+        phoneVerified: true,
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        totalVerifiedPhoneNumbers: { $sum: 1 },
+      },
+    },
+  ]);
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        totalCleaningInvoice,
+        totalProperties,
+        totalCleaners,
+        verifiedProperties,
+      },
+      "Dashboard statistics retrieved successfully"
+    )
+  );
+});
 
 const registerCleanerbyAdmin = asyncHandler(async (req, res) => {
   const { firstName, lastName, email, phone, DOB } = req.body;
@@ -59,100 +109,6 @@ const registerCleanerbyAdmin = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, cleaner, "Cleaner registered successfully"));
-});
-
-const getAllCleaningRequests = asyncHandler(async (req, res) => {
-  const cleaningRequests = await CleaningRequest.find().populate("property");
-
-  if (!cleaningRequests) {
-    throw new ApiError(404, "No cleaning requests found");
-  }
-
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        cleaningRequests,
-        "Cleaning requests retrieved successfully"
-      )
-    );
-});
-
-const getCleaningRequestById = asyncHandler(async (req, res) => {
-  const { cleaningRequestId } = req.params;
-
-  if (!cleaningRequestId.trim()) {
-    throw new ApiError(400, "Cleaning request id is required");
-  }
-  const cleaningRequest =
-    await CleaningRequest.findById(cleaningRequestId).populate("property");
-  if (!cleaningRequest) {
-    throw new ApiError(
-      404,
-      `Cleaning request with id ${cleaningRequestId} not found`
-    );
-  }
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        cleaningRequest,
-        "Cleaning request retrieved successfully"
-      )
-    );
-});
-
-const updateCleaningRequest = asyncHandler(async (req, res) => {
-  const { cleaningRequestId } = req.params;
-
-  const cleaningRequest = await CleaningRequest.findByIdAndUpdate(
-    cleaningRequestId,
-    req.body,
-    { new: true }
-  ).populate("property");
-
-  if (!cleaningRequest) {
-    throw new ApiError(
-      404,
-      `Cleaning request with id ${cleaningRequestId} not found`
-    );
-  }
-
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        cleaningRequest,
-        "Cleaning request updated successfully"
-      )
-    );
-});
-
-const deleteCleaningRequest = asyncHandler(async (req, res) => {
-  const { cleaningRequestId } = req.params;
-
-  const cleaningRequest =
-    await CleaningRequest.findByIdAndDelete(cleaningRequestId);
-
-  if (!cleaningRequest) {
-    throw new ApiError(
-      404,
-      `Cleaning request with id ${cleaningRequestId} not found`
-    );
-  }
-
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        cleaningRequest,
-        "Cleaning request deleted successfully"
-      )
-    );
 });
 
 const getAllProperty = asyncHandler(async (req, res) => {
@@ -288,6 +244,7 @@ const deleteContactInfo = asyncHandler(async (req, res) => {
 });
 
 export {
+  Dashboard,
   registerCleanerbyAdmin,
   getAllCleaningRequests,
   getCleaningRequestById,
