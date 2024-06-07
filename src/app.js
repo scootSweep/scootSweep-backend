@@ -20,14 +20,12 @@ app.use(cookieParser());
 
 import healthcheckRouter from "./routes/healthcheck.routes.js";
 import auth from "./routes/auth.routes.js";
-import request from "./routes/cleaningRequest.routes.js";
 import admin from "./routes/admin.routes.js";
 import cleaner from "./routes/cleaner.routes.js";
 
 //routes declaration
 app.use("/api/v1/healthcheck", healthcheckRouter);
 app.use("/api/v1/auth", auth);
-app.use("/api/v1/request", request);
 app.use("/api/v1/admin", admin);
 app.use("/api/v1/cleaner", cleaner);
 
