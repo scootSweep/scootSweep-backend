@@ -1,4 +1,5 @@
 import {
+  Dashboard,
   getAllCleaningRequests,
   getCleaningRequestById,
   updateCleaningRequest,
@@ -19,6 +20,9 @@ import { upload } from "../middlewares/multer.middleware.js";
 
 const router = Router();
 router.use(verifyAdmin);
+
+// Dashboard
+router.route("/dashboard").get(Dashboard);
 
 // cleaner-routes
 router.route("/register/cleaner").post(
