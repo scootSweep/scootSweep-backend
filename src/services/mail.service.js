@@ -20,12 +20,19 @@ const transporter = nodemailer.createTransport({
 async function sendEmail(to, subject, template, data) {
   try {
     // Construct the path to the EJS template file
+
+    console.log("to", to);
+    console.log("template", template);
+    console.log("data", data);
+
     const templatePath = join(__dirname, "../views/" + template + ".ejs");
 
     // Render the EJS template file with the provided data
     const html = await ejs.renderFile(templatePath, data, {
       async: true,
     });
+
+    console.log("html", html);
 
     if (!html) {
       throw new ApiError(500, "Error while rendering email template");
