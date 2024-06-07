@@ -246,10 +246,6 @@ const deleteContactInfo = asyncHandler(async (req, res) => {
 export {
   Dashboard,
   registerCleanerbyAdmin,
-  getAllCleaningRequests,
-  getCleaningRequestById,
-  updateCleaningRequest,
-  deleteCleaningRequest,
   getAllProperty,
   getPropertyById,
   getAllCleaner,
