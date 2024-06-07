@@ -1,9 +1,5 @@
 import {
   Dashboard,
-  getAllCleaningRequests,
-  getCleaningRequestById,
-  updateCleaningRequest,
-  deleteCleaningRequest,
   getAllProperty,
   getPropertyById,
   getAllCleaner,
@@ -33,13 +29,6 @@ router.route("/register/cleaner").post(
   registerCleanerbyAdmin
 );
 // router.route("/register/cleaner").post(upload.none(), registerCleaner);
-
-router.route("/cleaning_requests").get(getAllCleaningRequests);
-router
-  .route("/cleaning_requests/:cleaningRequestId")
-  .get(getCleaningRequestById)
-  .put(updateCleaningRequest)
-  .delete(deleteCleaningRequest);
 
 router.route("/property").get(getAllProperty);
 router.route("/property/:propertyId").get(getPropertyById);
