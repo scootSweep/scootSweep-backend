@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Redeployment Notice</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .citation-container {
+        background-color: white;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        width: 600px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+
+      .button-container {
+        margin: 10px 0;
+      }
+
+      button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      .citation-container h1,
+      .citation-container h2 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .citation-details,
+      .violation-info {
+        margin-bottom: 20px;
+      }
+
+      .citation-details p,
+      .violation-info p {
+        margin: 10px 0;
+      }
+
+      .images-section {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+      }
+
+      .image {
+        text-align: center;
+        margin-right: 10px;
+      }
+
+      .image img {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="citation-container">
+      <h1>Redeployment Notice</h1>
+      <h2>Citation</h2>
+      <hr />
+      <div class="citation-details">
+        <p><strong>Operator Name:</strong> <%= operatorName %></p>
+        <p><strong>Device ID:</strong> <%= deviceID %></p>
+        <p><strong>Invoice Number:</strong> <%= invoiceNumber %></p>
+        <p><strong>Additional Notes:</strong> <%= additionalNotes %></p>
+        <p>
+          <strong>Redeploy Date:</strong> <%= new
+          Date(redeployDate).toLocaleDateString() %>
+        </p>
+      </div>
+      <div class="images-section">
+        <div class="image">
+          <p><strong>Device ID Image</strong></p>
+          <img src="<%= deviceIDImage %>" alt="Device ID Image" />
+        </div>
+      </div>
+    </div>
+
+    <!-- <div class="button-container">
+      <a
+        href="https://yourserver.com/path/to/generated-citation.pdf"
+        target="_blank"
+      >
+        <button>Download PDF</button>
+      </a>
+    </div> -->
+  </body>
+</html>
