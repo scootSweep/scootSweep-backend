@@ -8,6 +8,9 @@ import {
   registerCleanerbyAdmin,
   getAllContactInfo,
   deleteContactInfo,
+  getAllCleaningInvoice,
+  toggleInvoicePaymentStatus,
+  getInvoicePaymentStatusbyId,
 } from "../controllers/admin.controller.js";
 import { registerCleaner } from "../controllers/auth.controller.js";
 import { Router } from "express";
@@ -37,5 +40,15 @@ router.route("/cleaner/:cleanerId").get(getCleanerById);
 
 router.route("/contact").post(createContactInfo).get(getAllContactInfo);
 router.route("/contact/:contactInfoId").delete(deleteContactInfo);
+
+// cleaning-invoice-routes
+
+router.route("/cleaning-invoice").get(getAllCleaningInvoice);
+router
+  .route("/cleaning-invoice/:cleaningInvoiceId/:cleanerId")
+  .patch(toggleInvoicePaymentStatus);
+router
+  .route("/cleaning-invoice/:cleaningInvoiceId")
+  .get(getInvoicePaymentStatusbyId);
 
 export default router;
