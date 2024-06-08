@@ -42,7 +42,7 @@ const cleaningInvoiceSchema = new mongoose.Schema(
     },
     invoiceStatus: {
       type: String,
-      enum: ["Pending", "Paid", "Unpaid"],
+      enum: ["Pending", "Approved", "Rejected"],
       default: "Pending",
     },
     paymentStatus: {
@@ -55,7 +55,6 @@ const cleaningInvoiceSchema = new mongoose.Schema(
     additionalNotes: String,
     invoiceNumber: {
       type: Number,
-      required: true,
     },
   },
   { timestamps: true }
