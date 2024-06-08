@@ -5,16 +5,14 @@ import { CleaningInvoice } from "../models/cleaningInvoice.model.js";
 import { Property } from "../models/property.model.js";
 import { Cleaner } from "../models/cleaner.model.js";
 import { ContactInfo } from "../models/contactInfo.model.js";
+import { Redeployment } from "../models/redeployment.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { isValidPhoneNumber } from "../utils/validation.js";
+import { sendOtp } from "../services/otp.service.js";
 import { isValidObjectId } from "mongoose";
 
 const Dashboard = asyncHandler(async (req, res) => {
-  // calculate the statistics like number of Cleaning Invoice, number of properties, number of cleaners, number of verified phone number for properties. using mongo aggregate
-
-  // cal the number of Cleaning Invoice with status pending with count of totalCleaningInvoice
-
-  const totalCleaningInvoice = await CleaningInvoice.aggregate([
+  const PendingCleaningInvoice = await CleaningInvoice.aggregate([
     {
       $match: {
         invoiceStatus: "Pending",
@@ -28,10 +26,26 @@ const Dashboard = asyncHandler(async (req, res) => {
     },
   ]);
 
-  // number of properties, number of cleaners, number of verified phone number for properties
+  const ApprovedCleaningInvoice = await CleaningInvoice.aggregate([
+    {
+      $match: {
+        invoiceStatus: "Approved",
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        totalCleaningInvoice: { $sum: 1 },
+      },
+    },
+  ]);
+
   const totalProperties = await Property.countDocuments({});
   const totalCleaners = await Cleaner.countDocuments({});
-  const verifiedProperties = await Property.aggregate([
+  const totalCleaningInvoice = await CleaningInvoice.countDocuments({});
+  const totalRedeployment = await Redeployment.countDocuments({});
+
+  const verifiedPropertiesResult = await Property.aggregate([
     {
       $match: {
         phoneVerified: true,
@@ -45,6 +59,12 @@ const Dashboard = asyncHandler(async (req, res) => {
     },
   ]);
 
+  // Extract the total verified phone numbers from the aggregation result
+  const VerifiedPropertiesNumbers =
+    verifiedPropertiesResult.length > 0
+      ? verifiedPropertiesResult[0].totalVerifiedPhoneNumbers
+      : 0;
+
   return res.status(200).json(
     new ApiResponse(
       200,
@@ -52,7 +72,16 @@ const Dashboard = asyncHandler(async (req, res) => {
         totalCleaningInvoice,
         totalProperties,
         totalCleaners,
-        verifiedProperties,
+        VerifiedPropertiesNumbers,
+        PendingCleaningInvoice:
+          PendingCleaningInvoice.length > 0
+            ? PendingCleaningInvoice[0].totalCleaningInvoice
+            : 0,
+        ApprovedCleaningInvoice:
+          ApprovedCleaningInvoice.length > 0
+            ? ApprovedCleaningInvoice[0].totalCleaningInvoice
+            : 0,
+        totalRedeployment,
       },
       "Dashboard statistics retrieved successfully"
     )
@@ -242,6 +271,107 @@ const deleteContactInfo = asyncHandler(async (req, res) => {
       new ApiResponse(200, contactInfo, "Contact info deleted successfully")
     );
 });
+// new
+const getAllCleaningInvoice = asyncHandler(async (req, res) => {
+  const cleaningInvoice = await CleaningInvoice.find({});
+  if (!cleaningInvoice) {
+    throw new ApiError(404, "No cleaning invoice found");
+  }
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        cleaningInvoice,
+        "Cleaning invoice found successfully"
+      )
+    );
+});
+
+const toggleInvoicePaymentStatus = asyncHandler(async (req, res) => {
+  const { cleaningInvoiceId, cleanerId } = req.params;
+
+  if (!isValidObjectId(cleaningInvoiceId)) {
+    throw new ApiError(400, "Cleaning invoice id is required");
+  }
+
+  // toggle payment status
+
+  const cleaningInvoice = await CleaningInvoice.findById(cleaningInvoiceId);
+
+  if (!cleaningInvoice) {
+    throw new ApiError(
+      404,
+      `Cleaning invoice with id ${cleaningInvoiceId} not found`
+    );
+  }
+
+  cleaningInvoice.paymentStatus =
+    cleaningInvoice.paymentStatus === "Paid" ? "Unpaid" : "Paid";
+  cleaningInvoice.invoiceStatus =
+    cleaningInvoice.invoiceStatus === "Approved" ? "Pending" : "Approved";
+  await cleaningInvoice.save();
+
+  if (cleaningInvoice.paymentStatus === "Paid") {
+    const cleaner = await Cleaner.findById(cleanerId);
+    if (!cleaner) {
+      throw new ApiError(404, `Cleaner with id ${cleanerId} not found`);
+    }
+    const message = await sendOtp(cleaner.phone);
+    if (!message) {
+      throw new ApiError(500, `Error while sending otp ${message}`);
+    }
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        cleaningInvoice,
+        "Payment status updated successfully"
+      )
+    );
+});
+
+const getInvoicePaymentStatusbyId = asyncHandler(async (req, res) => {
+  const { cleaningInvoiceId } = req.params;
+
+  if (!isValidObjectId(cleaningInvoiceId)) {
+    throw new ApiError(400, "Cleaning invoice id is required");
+  }
+
+  const cleaningInvoice = await CleaningInvoice.findById(cleaningInvoiceId);
+
+  if (!cleaningInvoice) {
+    throw new ApiError(
+      404,
+      `Cleaning invoice with id ${cleaningInvoiceId} not found`
+    );
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        cleaningInvoice,
+        "Payment status retrieved successfully"
+      )
+    );
+});
+
+const getAllRedeployment = asyncHandler(async (req, res) => {
+  const redeployment = await Redeployment.find({});
+  if (!redeployment) {
+    throw new ApiError(404, "No redeployment found");
+  }
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, redeployment, "Redeployment found successfully")
+    );
+});
 
 export {
   Dashboard,
@@ -253,4 +383,8 @@ export {
   createContactInfo,
   getAllContactInfo,
   deleteContactInfo,
+  getAllCleaningInvoice,
+  toggleInvoicePaymentStatus,
+  getInvoicePaymentStatusbyId,
+  getAllRedeployment,
 };
