@@ -17,18 +17,19 @@ const generateOtp = () => {
 };
 
 async function sendOtp(number) {
-  generateOtp();
+  const otp = generateOtp();
 
-  const message = await client.messages.create({
-    body: `Your otp verification for user is ${OTP}`,
-    to: number,
-    from: "+16502499145",
-  });
+  // const message = await client.messages.create({
+  //   body: `Your otp verification for user is ${OTP}`,
+  //   messagingServiceSid: "MG3403a69ee58539d33b66f4093c8ea857",
+  //   to: number,
+  //   from: "+16502499145",
+  // });
 
-  if (!message) {
-    throw new ApiError(500, `error while sending otp ${message}`);
-  }
-  return message;
+  // if (!message) {
+  //   throw new ApiError(500, `error while sending otp ${message}`);
+  // }
+  return otp;
 }
 
 function verifyOtp(otp) {
