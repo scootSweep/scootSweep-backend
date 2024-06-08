@@ -11,6 +11,7 @@ import {
   getAllCleaningInvoice,
   toggleInvoicePaymentStatus,
   getInvoicePaymentStatusbyId,
+  getAllRedeployment,
 } from "../controllers/admin.controller.js";
 import { registerCleaner } from "../controllers/auth.controller.js";
 import { Router } from "express";
@@ -50,5 +51,8 @@ router
 router
   .route("/cleaning-invoice/:cleaningInvoiceId")
   .get(getInvoicePaymentStatusbyId);
+
+// redeployment-routes
+router.route("/redeployment").get(getAllRedeployment);
 
 export default router;
