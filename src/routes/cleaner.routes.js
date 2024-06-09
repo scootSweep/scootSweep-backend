@@ -14,7 +14,7 @@ router
   .post(upload.none(), cleanerService.createCleaningInvoice);
 
 // send otp to open the door
-router.route("/door-otp").get(cleanerService.doorOtp);
+router.route("/door-otp").post(cleanerService.doorOtp);
 router.route("/verify-door").post(cleanerService.verifyDoorOtp);
 
 router
