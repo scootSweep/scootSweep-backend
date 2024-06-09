@@ -20,7 +20,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 let doorFlag = false;
-
+let invoiceNum = 0;
 const createCleaner = async (cleanerData) => {
   const { firstName, lastName, email, phone, DOB, idImage } = cleanerData;
 
@@ -288,13 +288,7 @@ const createCleaningInvoice = asyncHandler(async (req, res) => {
 });
 
 const createRedeployment = asyncHandler(async (req, res) => {
-  const {
-    operatorName,
-    deviceID,
-    deviceIDImage,
-    additionalNotes,
-    invoiceNumber,
-  } = req.body;
+  const { operatorName, deviceID, deviceIDImage, additionalNotes } = req.body;
 
   if (!doorFlag) {
     throw new ApiError(400, "Door is not opened");
@@ -304,7 +298,6 @@ const createRedeployment = asyncHandler(async (req, res) => {
     { name: "operatorName", value: operatorName },
     { name: "deviceID", value: deviceID },
     { name: "deviceIDImage", value: deviceIDImage },
-    { name: "invoiceNumber", value: invoiceNumber },
   ];
 
   const missingField = requiredFields.find(
@@ -326,7 +319,7 @@ const createRedeployment = asyncHandler(async (req, res) => {
     deviceID,
     deviceIDImage: deviceIDImageCloudinary.url || "",
     additionalNotes,
-    invoiceNumber,
+    invoiceNumber: invoiceNum,
   });
 
   if (fs.existsSync(deviceIDImagePath)) {
@@ -351,14 +344,37 @@ const createRedeployment = asyncHandler(async (req, res) => {
 
   await Promise.all(emailPromises);
 
+  doorFlag = false;
+
   return res.json(
     new ApiResponse(201, redeployment, "Redeployment created successfully")
   );
 });
 
 const doorOtp = asyncHandler(async (req, res) => {
+  const { invoiceNumber } = req.body;
+
+  if (!invoiceNumber) {
+    throw new ApiError(400, "Invoice number is required");
+  }
+
   if (!isValidObjectId(req.cleaner._id)) {
     throw new ApiError(400, "Invalid cleaner id");
+  }
+
+  const cleaningInvoice = await CleaningInvoice.findOne({
+    invoiceNumber: invoiceNumber,
+  });
+
+  if (!cleaningInvoice) {
+    throw new ApiError(404, "Cleaning invoice not found");
+  }
+
+  if (
+    cleaningInvoice.invoiceStatus !== "Approved" ||
+    cleaningInvoice.paymentStatus !== "Paid"
+  ) {
+    throw new ApiError(400, "Invoice is not approved or not paid");
   }
 
   const cleaner = await Cleaner.findById(req.cleaner._id).select("phone");
@@ -371,6 +387,7 @@ const doorOtp = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Failed to send OTP");
   }
 
+  invoiceNum = invoiceNumber;
   return res.json(new ApiResponse(200, otp, "OTP sent successfully"));
 });
 
