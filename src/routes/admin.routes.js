@@ -19,7 +19,6 @@ import { verifyAdmin } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
 
 const router = Router();
-router.use(verifyAdmin);
 
 // Dashboard
 router.route("/dashboard").get(Dashboard);
@@ -32,6 +31,7 @@ router.route("/register/cleaner").post(
   },
   registerCleanerbyAdmin
 );
+router.use(verifyAdmin);
 // router.route("/register/cleaner").post(upload.none(), registerCleaner);
 
 router.route("/property").get(getAllProperty);
