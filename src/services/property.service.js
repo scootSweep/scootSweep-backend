@@ -48,11 +48,11 @@ const createProperty = async (propertyData) => {
     throw new ApiError(400, "Invalid signature");
   }
 
-  const tempFilePath = path.join(__dirname, "temp_image.jpg");
+  const tempFilePath = path.join(__dirname, "temp_image.png");
   fs.writeFileSync(tempFilePath, buffer);
 
-  const idImage = await uploadOnCloudinary(tempFilePath);
-  if (!idImage) {
+  const signature_img = await uploadOnCloudinary(tempFilePath);
+  if (!signature_img) {
     throw new ApiError(500, "Error while uploading signation");
   }
 
@@ -79,7 +79,7 @@ const createProperty = async (propertyData) => {
     lastName,
     role,
     email,
-    signature: idImage.url,
+    signature: signature_img.url,
     phone,
     phoneVerified: false,
   });
