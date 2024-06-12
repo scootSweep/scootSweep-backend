@@ -38,7 +38,7 @@ async function sendOtp(number) {
   if (!message) {
     throw new ApiError(500, `error while sending otp ${message}`);
   }
-  return otp;
+  return message;
 }
 
 function verifyOtp(otp) {
