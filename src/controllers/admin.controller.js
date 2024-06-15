@@ -312,16 +312,17 @@ const toggleInvoicePaymentStatus = asyncHandler(async (req, res) => {
     cleaningInvoice.invoiceStatus === "Approved" ? "Pending" : "Approved";
   await cleaningInvoice.save();
 
-  if (cleaningInvoice.paymentStatus === "Paid") {
-    const cleaner = await Cleaner.findById(cleanerId);
-    if (!cleaner) {
-      throw new ApiError(404, `Cleaner with id ${cleanerId} not found`);
-    }
-    const message = await sendOtp(cleaner.phone);
-    if (!message) {
-      throw new ApiError(500, `Error while sending otp ${message}`);
-    }
-  }
+  // to send otp to cleaner phone number
+  // if (cleaningInvoice.paymentStatus === "Paid") {
+  //   const cleaner = await Cleaner.findById(cleanerId);
+  //   if (!cleaner) {
+  //     throw new ApiError(404, `Cleaner with id ${cleanerId} not found`);
+  //   }
+  //   const message = await sendOtp(cleaner.phone);
+  //   if (!message) {
+  //     throw new ApiError(500, `Error while sending otp ${message}`);
+  //   }
+  // }
 
   return res
     .status(200)
