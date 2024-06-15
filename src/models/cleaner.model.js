@@ -24,6 +24,10 @@ const cleanerSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    password: {
+      type: String,
+      required: true,
+    },
     phone: {
       type: String,
       required: true,
@@ -32,10 +36,18 @@ const cleanerSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isMailVerified: {
+      type: Boolean,
+      default: false,
+    },
     idImage: String,
     approved: {
       type: Boolean,
       default: false,
+    },
+    token: {
+      type: String,
+      default: "",
     },
     refreshToken: {
       type: String,

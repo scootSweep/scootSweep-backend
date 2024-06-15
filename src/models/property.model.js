@@ -37,6 +37,10 @@ const propertySchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    password: {
+      type: String,
+      required: true,
+    },
     signature: {
       type: String,
       require: true,
@@ -48,6 +52,14 @@ const propertySchema = new mongoose.Schema(
     phoneVerified: {
       type: Boolean,
       default: false,
+    },
+    isMailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    token: {
+      type: String,
+      default: "",
     },
     refreshToken: {
       type: String,
