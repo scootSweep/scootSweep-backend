@@ -56,7 +56,7 @@ async function sendEmailForResetPassword(name, email, token, endPoint) {
       from: "achintj96244@gmail.com",
       to: email,
       subject: "Reset Password",
-      html: `<p> hi ${name} click on the link to reset your password <a href="http://localhost:8000/api/v1/auth/reset-password${endPoint}?token=${token}">Reset Password</a></p>`,
+      html: `<p> hi ${name} click on the link to reset your password <a href="https://scootsweep-backend-production.up.railway.app/api/v1/auth/reset-password${endPoint}?token=${token}">Reset Password</a></p>`,
     };
 
     const Message = await transporter.sendMail(mailOptions);
