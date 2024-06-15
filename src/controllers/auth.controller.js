@@ -84,8 +84,16 @@ const verifyPropertyContact = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, "number is verified"));
 });
 
+const verifyPropertyEmail = asyncHandler(async (req, res) => {
+  await propertyService.verifyMail(req.body);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "email is verified successfully"));
+});
+
 const loginProperty = asyncHandler(async (req, res) => {
-  const property = await propertyService.login(req.body);
+  const property = await propertyService.loginWithEmail(req.body);
 
   const { accessToken, refreshToken } =
     await generatorAccessAndRefreshTokenForproperty(property._id);
@@ -105,6 +113,29 @@ const loginProperty = asyncHandler(async (req, res) => {
         "you are login"
       )
     );
+});
+
+const forgotPasswordProperty = asyncHandler(async (req, res) => {
+  const property = await propertyService.forgotPassword(req.body);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, property, "Reset password link sent"));
+});
+
+const resetPasswordProperty = asyncHandler(async (req, res) => {
+  const token = req.query.token;
+  const password = req.body.password;
+
+  if (!token || !password) {
+    throw new ApiError(400, "Token and password are required");
+  }
+
+  const property = await propertyService.resetPassword(token, password);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, property, "Password reset successfully"));
 });
 
 const logoutProperty = asyncHandler(async (req, res) => {
@@ -175,8 +206,17 @@ const verifyCleanerContact = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "cleaner number is verified"));
 });
 
+const verifyCleanerEmail = asyncHandler(async (req, res) => {
+  await cleanerService.verifyMail(req.body);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "cleaner email is verified successfully"));
+});
+
 const loginCleaner = asyncHandler(async (req, res) => {
-  const cleaner = await cleanerService.login(req.body);
+  // const cleaner = await cleanerService.login(req.body);
+  const cleaner = await cleanerService.loginWithEmail(req.body);
 
   const { accessToken, refreshToken } =
     await generatorAccessAndRefreshTokenForCleaner(cleaner._id);
@@ -192,6 +232,29 @@ const loginCleaner = asyncHandler(async (req, res) => {
         "you are login"
       )
     );
+});
+
+const forgotPasswordCleaner = asyncHandler(async (req, res) => {
+  const cleaner = await cleanerService.forgotPassword(req.body);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, cleaner, "Reset password link sent"));
+});
+
+const resetPasswordCleaner = asyncHandler(async (req, res) => {
+  const token = req.query.token;
+  const password = req.body.password;
+
+  if (!token || !password) {
+    throw new ApiError(400, "Token and password are required");
+  }
+
+  const cleaner = await cleanerService.resetPassword(token, password);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, cleaner, "Password reset successfully"));
 });
 
 const logoutCleaner = asyncHandler(async (req, res) => {
@@ -324,10 +387,16 @@ export {
   registerProperty,
   registerCleaner,
   verifyPropertyContact,
+  verifyPropertyEmail,
   loginProperty,
+  forgotPasswordProperty,
+  resetPasswordProperty,
   logoutProperty,
   verifyCleanerContact,
+  verifyCleanerEmail,
   loginCleaner,
+  forgotPasswordCleaner,
+  resetPasswordCleaner,
   logoutCleaner,
   sendOtptoMail,
   registerAdmin,
