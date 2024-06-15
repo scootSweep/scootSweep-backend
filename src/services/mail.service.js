@@ -19,21 +19,11 @@ const transporter = nodemailer.createTransport({
 
 async function sendEmail(to, subject, template, data) {
   try {
-    // Construct the path to the EJS template file
-
-    console.log("to", to);
-    console.log("template", template);
-    console.log("data", data);
-
     const templatePath = join(__dirname, "../views/" + template + ".ejs");
-
-    console.log("templatePath", templatePath);
     // Render the EJS template file with the provided data
     const html = await ejs.renderFile(templatePath, data, {
       async: true,
     });
-
-    console.log("html", html);
 
     if (!html) {
       throw new ApiError(500, "Error while rendering email template");
@@ -54,4 +44,30 @@ async function sendEmail(to, subject, template, data) {
   }
 }
 
-export { sendEmail };
+// write send email for resetpassword function
+
+async function sendEmailForResetPassword(name, email, token, endPoint) {
+  try {
+    if (!name || !email || !token) {
+      throw new ApiError(400, "Name, Email and Token are required");
+    }
+    console.log("check point", name, email, token);
+    const mailOptions = {
+      from: "achintj96244@gmail.com",
+      to: email,
+      subject: "Reset Password",
+      html: `<p> hi ${name} click on the link to reset your password <a href="http://localhost:8000/api/v1/auth/reset-password${endPoint}?token=${token}">Reset Password</a></p>`,
+    };
+
+    const Message = await transporter.sendMail(mailOptions);
+    if (!Message) {
+      throw new ApiError(500, "Error while sending email");
+    }
+    console.log("Message", Message);
+    return Message;
+  } catch (err) {
+    return err;
+  }
+}
+
+export { sendEmail, sendEmailForResetPassword };
