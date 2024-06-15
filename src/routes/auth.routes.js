@@ -31,7 +31,7 @@ import {
 const router = Router();
 
 router.route("/send-otp").post(sendOtpToContact);
-
+router.route("/mail-otp").post(sendOtptoMail);
 // property-routes
 router.route("/register/property").post(upload.none(), registerProperty);
 router.route("/verify-otp/property").post(verifyPropertyContact);
@@ -59,7 +59,6 @@ router.route("/reset-password/cleaner").post(resetPasswordCleaner);
 router.route("/logout/cleaner").post(verifyCleaner, logoutCleaner);
 
 // admin-routes
-router.route("/mail-otp/admin").post(sendOtptoMail);
 router.route("/register/admin").post(registerAdmin);
 router.route("/verify-email").post(verifyEmail);
 router.route("/login/admin").post(loginAdmin);
