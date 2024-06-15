@@ -9,7 +9,8 @@ import { Property } from "../models/property.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { CleaningInvoice } from "../models/cleaningInvoice.model.js";
 import { ContactInfo } from "../models/contactInfo.model.js";
-import { sendEmail } from "../services/mail.service.js";
+import randomstring from "randomstring";
+import { sendEmailForResetPassword } from "../services/mail.service.js";
 import { getNextSequenceValue } from "../utils/invoiceCounter.js";
 import { Redeployment } from "../models/redeployment.model.js";
 import { isValidObjectId } from "mongoose";
@@ -19,10 +20,12 @@ import path from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 let doorFlag = false;
 let invoiceNum = 0;
 const createCleaner = async (cleanerData) => {
-  const { firstName, lastName, email, phone, DOB, idImage } = cleanerData;
+  const { firstName, lastName, email, phone, DOB, idImage, password } =
+    cleanerData;
 
   const requiredFields = [
     { name: "firstName", value: firstName },
@@ -77,8 +80,10 @@ const createCleaner = async (cleanerData) => {
     lastName,
     dateOfBirth: dateOfBirth,
     email,
+    password,
     phone,
     phoneVerified: false,
+    isMailVerified: false,
     idImage: Image ? Image.url : "",
     approved: false,
   });
@@ -128,6 +133,64 @@ const verifyContact = async (details) => {
   return updatedCleaner;
 };
 
+const verifyMail = async (cleanerData) => {
+  const { email, otp } = cleanerData;
+  if (!email || !otp) {
+    throw new ApiError(400, "All fields are required");
+  }
+
+  if (!emailRegex.test(email)) {
+    throw new ApiError(400, "Invalid email format");
+  }
+
+  if (!verifyOtp(otp)) {
+    throw new ApiError(400, "Invalid OTP");
+  }
+
+  let cleaner = await Cleaner.findOne({
+    email,
+  });
+
+  if (!cleaner) {
+    throw new ApiError(400, "Invalid email");
+  }
+  if (cleaner.isMailVerified) {
+    throw new ApiResponse(400, "Email already verified");
+  }
+
+  cleaner.isMailVerified = true;
+
+  await cleaner.save();
+  // Now, perform a new query to retrieve the updated admin data without password and refreshToken
+  cleaner = await Cleaner.findOne({ email }).select("-password -refreshToken");
+  return cleaner;
+};
+
+const loginWithEmail = async (cleanerData) => {
+  const { email, password } = cleanerData;
+
+  if (!email || !password) {
+    throw new ApiError(400, "All fields are required");
+  }
+  if (!emailRegex.test(email)) {
+    throw new ApiError(400, "Invalid email format");
+  }
+
+  const cleaner = await Cleaner.findOne({
+    email,
+    password,
+  });
+
+  if (!cleaner) {
+    throw new ApiError(400, "Invalid email or password");
+  }
+
+  if (!cleaner.isMailVerified) {
+    throw new ApiError(400, "Email not verified");
+  }
+  return cleaner;
+};
+
 const login = async (details) => {
   const { number, otp } = details;
 
@@ -151,6 +214,55 @@ const login = async (details) => {
     throw new ApiError(404, "Cleaner not found");
   }
 
+  return cleaner;
+};
+
+const forgotPassword = async (details) => {
+  const { email } = details;
+
+  if (!email || !emailRegex.test(email)) {
+    throw new ApiError(400, "Invalid email");
+  }
+
+  const cleaner = await Cleaner.findOne({ email }).select("-refreshToken");
+
+  if (!cleaner) {
+    throw new ApiError(404, "cleaner not found");
+  }
+
+  const token = randomstring.generate();
+  cleaner.token = token;
+
+  await cleaner.save();
+  const mail = await sendEmailForResetPassword(
+    cleaner.firstName,
+    cleaner.email,
+    token,
+    "/cleaner"
+  );
+
+  if (!mail) {
+    throw new ApiError(500, "Error while sending email");
+  }
+
+  return cleaner;
+};
+
+const resetPassword = async (token, password) => {
+  if (!token || !password) {
+    throw new ApiError(400, "Token and password are required");
+  }
+
+  const cleaner = await Cleaner.findOne({ token }).select("-refreshToken");
+
+  if (!cleaner) {
+    throw new ApiError(404, "Cleaner not found");
+  }
+
+  cleaner.password = password;
+  cleaner.token = "";
+
+  await cleaner.save();
   return cleaner;
 };
 
@@ -409,11 +521,15 @@ const cleanerService = {
   createCleaner,
   verifyContact,
   login,
+  forgotPassword,
+  resetPassword,
   getAllPropertyLocation,
   createCleaningInvoice,
   createRedeployment,
   doorOtp,
   verifyDoorOtp,
+  verifyMail,
+  loginWithEmail,
 };
 
 export default cleanerService;
