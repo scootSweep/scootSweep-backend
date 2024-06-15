@@ -3,12 +3,15 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { Property } from "../models/property.model.js";
 import { verifyOtp } from "../services/otp.service.js";
 import { isValidPhoneNumber } from "../utils/validation.js";
+import randomstring from "randomstring";
+import { sendEmailForResetPassword } from "../services/mail.service.js";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import path from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const createProperty = async (propertyData) => {
   const {
     propertyName,
@@ -20,6 +23,8 @@ const createProperty = async (propertyData) => {
     email,
     signature,
     phone,
+    password,
+    isMailVerified,
   } = propertyData;
 
   const requiredFields = [
@@ -32,6 +37,8 @@ const createProperty = async (propertyData) => {
     { name: "email", value: email },
     { name: "signature", value: signature },
     { name: "phone", value: phone },
+    { name: "password", value: password },
+    { name: "isMailVerified", value: isMailVerified },
   ];
 
   // Find the first missing field and throw an error if any field is missing
@@ -82,6 +89,8 @@ const createProperty = async (propertyData) => {
     signature: signature_img.url,
     phone,
     phoneVerified: false,
+    password,
+    isMailVerified,
   });
 
   if (fs.existsSync(tempFilePath)) {
@@ -129,6 +138,66 @@ const verifyContact = async (details) => {
   return propertyOwner;
 };
 
+const verifyMail = async (propertyData) => {
+  const { email, otp } = propertyData;
+  if (!email || !otp) {
+    throw new ApiError(400, "All fields are required");
+  }
+
+  if (!emailRegex.test(email)) {
+    throw new ApiError(400, "Invalid email format");
+  }
+
+  if (!verifyOtp(otp)) {
+    throw new ApiError(400, "Invalid OTP");
+  }
+
+  let property = await Property.findOne({
+    email,
+  });
+
+  if (!property) {
+    throw new ApiError(400, "Invalid email");
+  }
+  if (property.isMailVerified) {
+    throw new ApiResponse(400, "Email already verified");
+  }
+
+  property.isMailVerified = true;
+
+  await property.save();
+
+  property = await Property.findOne({ email }).select(
+    "-password -refreshToken"
+  );
+  return property;
+};
+
+const loginWithEmail = async (propertyData) => {
+  const { email, password } = propertyData;
+
+  if (!email || !password) {
+    throw new ApiError(400, "All fields are required");
+  }
+  if (!emailRegex.test(email)) {
+    throw new ApiError(400, "Invalid email format");
+  }
+
+  const property = await Property.findOne({
+    email,
+    password,
+  });
+
+  if (!property) {
+    throw new ApiError(400, "Invalid email or password");
+  }
+
+  if (!property.isMailVerified) {
+    throw new ApiError(400, "Email not verified");
+  }
+  return property;
+};
+
 const login = async (details) => {
   const { number, otp } = details;
 
@@ -154,10 +223,64 @@ const login = async (details) => {
   return property;
 };
 
+const forgotPassword = async (details) => {
+  const { email } = details;
+  if (!email) {
+    throw new ApiError(400, "Email is required");
+  }
+  if (!emailRegex.test(email)) {
+    throw new ApiError(400, "Invalid email format");
+  }
+
+  const property = await Property.findOne({ email }).select("-refreshToken");
+
+  if (!property) {
+    throw new ApiError(404, "Property not found");
+  }
+
+  const token = randomstring.generate();
+
+  console.log(token);
+  property.token = token;
+
+  await property.save();
+
+  await sendEmailForResetPassword(
+    property.firstName,
+    property.email,
+    token,
+    "/property"
+  );
+
+  return property;
+};
+
+const resetPassword = async (token, password) => {
+  if (!token || !password) {
+    throw new ApiError(400, "Token and password are required");
+  }
+
+  const property = await Property.findOne({ token }).select("-refreshToken");
+
+  if (!property) {
+    throw new ApiError(404, "Property not found");
+  }
+
+  property.password = password;
+  property.token = "";
+
+  await property.save();
+  return property;
+};
+
 const propertyService = {
   createProperty,
   verifyContact,
+  verifyMail,
+  loginWithEmail,
   login,
+  forgotPassword,
+  resetPassword,
 };
 
 export default propertyService;
