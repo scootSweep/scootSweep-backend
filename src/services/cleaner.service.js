@@ -4,6 +4,8 @@ import { Cleaner } from "../models/cleaner.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { isValidPhoneNumber } from "../utils/validation.js";
 import { sendOtp } from "../services/otp.service.js";
+import { sendEmail } from "../services/mail.service.js";
+import { generateOtp } from "../services/otp.service.js";
 import { verifyOtp } from "../services/otp.service.js";
 import { Property } from "../models/property.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -489,14 +491,37 @@ const doorOtp = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invoice is not approved or not paid");
   }
 
-  const cleaner = await Cleaner.findById(req.cleaner._id).select("phone");
+  const cleaner = await Cleaner.findById(req.cleaner._id).select("email");
   if (!cleaner) {
     throw new ApiError(404, "Cleaner not found");
   }
 
-  const otp = await sendOtp(cleaner.phone);
+  // const otp = await sendOtp(cleaner.phone);
+  // if (!otp) {
+  //   throw new ApiError(500, "Failed to send OTP");
+  // }
+
+  const otp = generateOtp();
+
   if (!otp) {
-    throw new ApiError(500, "Failed to send OTP");
+    throw new ApiError(500, "error while sending otp");
+  }
+
+  const data = {
+    otp,
+    validity: "10 minutes",
+    companyName: "Cleanex",
+  };
+
+  const mail = await sendEmail(
+    cleaner.email,
+    "OTP for Email Verification",
+    "otp_email_template",
+    data
+  );
+
+  if (!mail) {
+    throw new ApiError(500, "error while sending otp");
   }
 
   invoiceNum = invoiceNumber;
