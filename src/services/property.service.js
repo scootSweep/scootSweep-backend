@@ -17,6 +17,9 @@ const createProperty = async (propertyData) => {
     propertyName,
     propertyAddress,
     gpsLocation,
+    city,
+    state,
+    zip,
     firstName,
     lastName,
     role,
@@ -31,6 +34,9 @@ const createProperty = async (propertyData) => {
     { name: "propertyName", value: propertyName },
     { name: "propertyAddress", value: propertyAddress },
     { name: "gpsLocation", value: gpsLocation },
+    { name: "city", value: city },
+    { name: "state", value: state },
+    { name: "zip", value: zip },
     { name: "firstName", value: firstName },
     { name: "lastName", value: lastName },
     { name: "role", value: role },
@@ -48,6 +54,14 @@ const createProperty = async (propertyData) => {
 
   if (missingField) {
     throw new ApiError(400, `Field ${missingField.name} is required`);
+  }
+
+  // check account is already exist or not
+
+  const propertyExist = await Property.findOne({ $or: [{ email }, { phone }] });
+
+  if (propertyExist) {
+    throw new ApiError(400, "Account already exist with this email or phone");
   }
 
   const buffer = Buffer.from(signature, "base64");
@@ -82,6 +96,9 @@ const createProperty = async (propertyData) => {
     propertyName,
     propertyAddress,
     gpsLocation,
+    city,
+    state,
+    zip,
     firstName,
     lastName,
     role,
