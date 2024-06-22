@@ -27,7 +27,6 @@ const createProperty = async (propertyData) => {
     signature,
     phone,
     password,
-    isMailVerified,
   } = propertyData;
 
   const requiredFields = [
@@ -44,7 +43,6 @@ const createProperty = async (propertyData) => {
     { name: "signature", value: signature },
     { name: "phone", value: phone },
     { name: "password", value: password },
-    { name: "isMailVerified", value: isMailVerified },
   ];
 
   // Find the first missing field and throw an error if any field is missing
@@ -107,7 +105,7 @@ const createProperty = async (propertyData) => {
     phone,
     phoneVerified: false,
     password,
-    isMailVerified,
+    isMailVerified: false,
   });
 
   if (fs.existsSync(tempFilePath)) {
