@@ -1,7 +1,7 @@
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { CleaningInvoice } from "../models/cleaningInvoice.model.js";
+import { IllegalDockless } from "../models/illegalDockless.js";
 import { Property } from "../models/property.model.js";
 import { Cleaner } from "../models/cleaner.model.js";
 import { ContactInfo } from "../models/contactInfo.model.js";
@@ -297,20 +297,20 @@ const toggleInvoicePaymentStatus = asyncHandler(async (req, res) => {
 
   // toggle payment status
 
-  const cleaningInvoice = await CleaningInvoice.findById(cleaningInvoiceId);
+  const illegalDockless = await IllegalDockless.findById(cleaningInvoiceId);
 
-  if (!cleaningInvoice) {
+  if (!illegalDockless) {
     throw new ApiError(
       404,
-      `Cleaning invoice with id ${cleaningInvoiceId} not found`
+      `illegal - Dockless with id ${cleaningInvoiceId} not found`
     );
   }
 
-  cleaningInvoice.paymentStatus =
-    cleaningInvoice.paymentStatus === "Paid" ? "Unpaid" : "Paid";
-  cleaningInvoice.invoiceStatus =
-    cleaningInvoice.invoiceStatus === "Approved" ? "Pending" : "Approved";
-  await cleaningInvoice.save();
+  illegalDockless.paymentStatus =
+    illegalDockless.paymentStatus === "Paid" ? "Unpaid" : "Paid";
+  illegalDockless.invoiceStatus =
+    illegalDockless.invoiceStatus === "Approved" ? "Pending" : "Approved";
+  await illegalDockless.save();
 
   // to send otp to cleaner phone number
   // if (cleaningInvoice.paymentStatus === "Paid") {
@@ -329,7 +329,7 @@ const toggleInvoicePaymentStatus = asyncHandler(async (req, res) => {
     .json(
       new ApiResponse(
         200,
-        cleaningInvoice,
+        illegalDockless,
         "Payment status updated successfully"
       )
     );
