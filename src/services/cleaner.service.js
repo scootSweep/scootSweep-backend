@@ -9,7 +9,7 @@ import { generateOtp } from "../services/otp.service.js";
 import { verifyOtp } from "../services/otp.service.js";
 import { Property } from "../models/property.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { CleaningInvoice } from "../models/cleaningInvoice.model.js";
+import { IllegalDockless } from "../models/illegalDockless.js";
 import { ContactInfo } from "../models/contactInfo.model.js";
 import randomstring from "randomstring";
 import { sendEmailForResetPassword } from "../services/mail.service.js";
@@ -280,18 +280,18 @@ const getAllPropertyLocation = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, properties, "Properties found"));
 });
 
-const createCleaningInvoice = asyncHandler(async (req, res) => {
+const createillegalDocklessRemoval = asyncHandler(async (req, res) => {
   const {
-    reason,
+    // reason,
     operatorName,
     deviceID,
     deviceIDImage,
-    unauthorizedParkingImage,
+    // unauthorizedParkingImage,
     gpsLocation,
-    authorizationStatus,
+    // authorizationStatus,
     invoiceStatus,
     paymentStatus,
-    paymentAmount,
+    // paymentAmount,
     additionalNotes,
   } = req.body;
 
@@ -300,15 +300,15 @@ const createCleaningInvoice = asyncHandler(async (req, res) => {
   // }
 
   const requiredFields = [
-    { name: "reason", value: reason },
+    // { name: "reason", value: reason },
     { name: "operatorName", value: operatorName },
     { name: "deviceID", value: deviceID },
     { name: "deviceIDImage", value: deviceIDImage },
     { name: "gpsLocation", value: gpsLocation },
-    { name: "authorizationStatus", value: authorizationStatus },
+    // { name: "authorizationStatus", value: authorizationStatus },
     { name: "invoiceStatus", value: invoiceStatus },
     { name: "paymentStatus", value: paymentStatus },
-    { name: "paymentAmount", value: paymentAmount },
+    // { name: "paymentAmount", value: paymentAmount },
   ];
 
   const missingField = requiredFields.find(
@@ -320,36 +320,36 @@ const createCleaningInvoice = asyncHandler(async (req, res) => {
   }
 
   const tempimage = Buffer.from(deviceIDImage, "base64");
-  const tempimage2 = Buffer.from(unauthorizedParkingImage, "base64");
+  // const tempimage2 = Buffer.from(unauthorizedParkingImage, "base64");
 
   const deviceIDImagePath = path.join(__dirname, "temp_deviceID_image.jpeg");
-  const unauthorizedParkingImagePath = path.join(
-    __dirname,
-    "temp_unauthorized_parking_image.jpeg"
-  );
+  // const unauthorizedParkingImagePath = path.join(
+  //   __dirname,
+  //   "temp_unauthorized_parking_image.jpeg"
+  // );
 
   fs.writeFileSync(deviceIDImagePath, tempimage);
-  fs.writeFileSync(unauthorizedParkingImagePath, tempimage2);
+  // fs.writeFileSync(unauthorizedParkingImagePath, tempimage2);
 
   const deviceIDImageCloudinary = await uploadOnCloudinary(deviceIDImagePath);
-  const unauthorizedParkingImageCloudinary = await uploadOnCloudinary(
-    unauthorizedParkingImagePath
-  );
+  // const unauthorizedParkingImageCloudinary = await uploadOnCloudinary(
+  //   unauthorizedParkingImagePath
+  // );
 
   const invoiceNumber = await getNextSequenceValue("cleaningInvoice");
 
-  const cleaningInvoice = await CleaningInvoice.create({
+  const unauthorizedDock = await IllegalDockless.create({
     cleaner: req.cleaner._id,
-    reason,
+    // reason,
     operatorName,
     deviceID,
     deviceIDImage: deviceIDImageCloudinary.url || "",
-    unauthorizedParkingImage: unauthorizedParkingImageCloudinary.url || "",
+    // unauthorizedParkingImage: unauthorizedParkingImageCloudinary.url || "",
     gpsLocation,
-    authorizationStatus,
+    // authorizationStatus,
     invoiceStatus,
     paymentStatus,
-    paymentAmount,
+    // paymentAmount,
     additionalNotes,
     invoiceNumber,
   });
@@ -357,9 +357,9 @@ const createCleaningInvoice = asyncHandler(async (req, res) => {
   if (fs.existsSync(deviceIDImagePath)) {
     fs.unlinkSync(deviceIDImagePath);
   }
-  if (fs.existsSync(unauthorizedParkingImagePath)) {
-    fs.unlinkSync(unauthorizedParkingImagePath);
-  }
+  // if (fs.existsSync(unauthorizedParkingImagePath)) {
+  //   fs.unlinkSync(unauthorizedParkingImagePath);
+  // }
 
   const contactInfo = await ContactInfo.find({});
   const emailList = contactInfo.map((info) => info.email);
@@ -371,9 +371,9 @@ const createCleaningInvoice = asyncHandler(async (req, res) => {
   const emailPromises = emailList.map(async (email) => {
     await sendEmail(
       email,
-      "Cleaning Invoice",
+      "illegal Dockless Removal",
       "cleaningInvoice_template",
-      { ...cleaningInvoice.toObject(), violationLocationImage } // Pass the violationLocationImage to the email template
+      { ...unauthorizedDock.toObject(), violationLocationImage } // Pass the violationLocationImage to the email template
     );
   });
 
@@ -383,20 +383,20 @@ const createCleaningInvoice = asyncHandler(async (req, res) => {
 
   await sendEmail(
     email,
-    "Cleaning Invoice",
+    "illegal Dockless Removal",
     "cleaningInvoice_template",
-    { ...cleaningInvoice.toObject(), violationLocationImage } // Pass the violationLocationImage to the email template
+    { ...unauthorizedDock.toObject(), violationLocationImage } // Pass the violationLocationImage to the email template
   );
 
-  if (!cleaningInvoice) {
+  if (!unauthorizedDock) {
     throw new ApiError(500, "Failed to create cleaning invoice");
   }
 
   return res.json(
     new ApiResponse(
       201,
-      cleaningInvoice,
-      "Cleaning invoice created successfully"
+      unauthorizedDock,
+      "illegal Dockless Removal Requeset created successfully"
     )
   );
 });
@@ -404,9 +404,9 @@ const createCleaningInvoice = asyncHandler(async (req, res) => {
 const createRedeployment = asyncHandler(async (req, res) => {
   const { operatorName, deviceID, deviceIDImage, additionalNotes } = req.body;
 
-  if (!doorFlag) {
-    throw new ApiError(400, "Door is not opened");
-  }
+  // if (!doorFlag) {
+  //   throw new ApiError(400, "Door is not opened");
+  // }
 
   const requiredFields = [
     { name: "operatorName", value: operatorName },
@@ -458,7 +458,7 @@ const createRedeployment = asyncHandler(async (req, res) => {
 
   await Promise.all(emailPromises);
 
-  doorFlag = false;
+  // doorFlag = false;
 
   return res.json(
     new ApiResponse(201, redeployment, "Redeployment created successfully")
@@ -541,6 +541,26 @@ const verifyDoorOtp = asyncHandler(async (req, res) => {
   doorFlag = true;
   return res.json(new ApiResponse(200, null, "door is opened successfully"));
 });
+// create a getList of cleaning invoice of a cleaner
+
+const getListOfDock = asyncHandler(async (req, res) => {
+  const cleaner = req.cleaner;
+  const illegalDockless = await IllegalDockless.find({
+    cleaner: cleaner._id,
+  });
+
+  if (!illegalDockless) {
+    throw new ApiError(404, "illegal - Dockless not found");
+  }
+
+  return res.json(
+    new ApiResponse(
+      200,
+      illegalDockless,
+      "illegal - Dockless found successfully"
+    )
+  );
+});
 
 const cleanerService = {
   createCleaner,
@@ -549,12 +569,13 @@ const cleanerService = {
   forgotPassword,
   resetPassword,
   getAllPropertyLocation,
-  createCleaningInvoice,
+  createillegalDocklessRemoval,
   createRedeployment,
   doorOtp,
   verifyDoorOtp,
   verifyMail,
   loginWithEmail,
+  getListOfDock,
 };
 
 export default cleanerService;
