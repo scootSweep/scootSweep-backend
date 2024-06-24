@@ -10,8 +10,10 @@ router.route("/property-location").get(cleanerService.getAllPropertyLocation);
 router.use(verifyCleaner);
 // router.route("/cleaning-invoice").post(upload.none(), createCleaningInvoice);
 router
-  .route("/cleaning-invoice")
-  .post(upload.none(), cleanerService.createCleaningInvoice);
+  .route("/unauthorized-dock")
+  .post(upload.none(), cleanerService.createillegalDocklessRemoval);
+
+router.route("/list-of-dock").get(cleanerService.getListOfDock);
 
 // send otp to open the door
 router.route("/door-otp").post(cleanerService.doorOtp);
