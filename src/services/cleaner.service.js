@@ -434,7 +434,7 @@ const createRedeployment = asyncHandler(async (req, res) => {
     cleaner: req.cleaner._id,
     operatorName,
     deviceID,
-    deviceIDImage: deviceIDImageCloudinary.url || "",
+    deviceIDImage: deviceIDImageCloudinary?.url || "",
     additionalNotes,
     invoiceNumber: invoiceNum,
   });
