@@ -7,6 +7,14 @@ const illegalDocklessSchema = new mongoose.Schema(
       ref: "Cleaner",
       required: true,
     },
+    time: {
+      type: String,
+      required: true,
+    },
+    date: {
+      type: Date,
+      required: true,
+    },
     // reason: {
     //   type: String,
     //   enum: [

@@ -19,6 +19,7 @@ import { isValidObjectId } from "mongoose";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import path from "path";
+import { CallInstance } from "twilio/lib/rest/insights/v1/call.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -282,16 +283,13 @@ const getAllPropertyLocation = asyncHandler(async (req, res) => {
 
 const createillegalDocklessRemoval = asyncHandler(async (req, res) => {
   const {
-    // reason,
     operatorName,
     deviceID,
     deviceIDImage,
-    // unauthorizedParkingImage,
+    time,
+    date,
     gpsLocation,
     typeOfDevice,
-    // authorizationStatus,
-    // invoiceStatus,
-    // paymentAmount,
     additionalNotes,
   } = req.body;
 
@@ -306,10 +304,8 @@ const createillegalDocklessRemoval = asyncHandler(async (req, res) => {
     { name: "deviceIDImage", value: deviceIDImage },
     { name: "gpsLocation", value: gpsLocation },
     { name: "typeOfDevice", value: typeOfDevice },
-    // { name: "authorizationStatus", value: authorizationStatus },
-    // { name: "invoiceStatus", value: invoiceStatus },
-    // { name: "paymentStatus", value: paymentStatus },
-    // { name: "paymentAmount", value: paymentAmount },
+    { name: "time", value: time },
+    { name: "date", value: date },
   ];
 
   const missingField = requiredFields.find(
@@ -321,38 +317,27 @@ const createillegalDocklessRemoval = asyncHandler(async (req, res) => {
   }
 
   const tempimage = Buffer.from(deviceIDImage, "base64");
-  // const tempimage2 = Buffer.from(unauthorizedParkingImage, "base64");
-
   const deviceIDImagePath = path.join(__dirname, "temp_deviceID_image.jpeg");
-  // const unauthorizedParkingImagePath = path.join(
-  //   __dirname,
-  //   "temp_unauthorized_parking_image.jpeg"
-  // );
 
   fs.writeFileSync(deviceIDImagePath, tempimage);
-  // fs.writeFileSync(unauthorizedParkingImagePath, tempimage2);
 
   const deviceIDImageCloudinary = await uploadOnCloudinary(deviceIDImagePath);
-  // const unauthorizedParkingImageCloudinary = await uploadOnCloudinary(
-  //   unauthorizedParkingImagePath
-  // );
-
   const invoiceNumber = await getNextSequenceValue("cleaningInvoice");
+
+  const dateParts = date.split("/");
+  const dateObj = new Date(`${dateParts[1]}/${dateParts[0]}/${dateParts[2]}`);
 
   const unauthorizedDock = await IllegalDockless.create({
     cleaner: req.cleaner._id,
-    // reason,
     operatorName,
     deviceID,
-    // deviceIDImage can be null
     deviceIDImage: deviceIDImageCloudinary?.url || "",
-    // unauthorizedParkingImage: unauthorizedParkingImageCloudinary.url || "",
     gpsLocation,
     typeOfDevice,
-    // authorizationStatus,
+    time,
+    date: dateObj,
     invoiceStatus: "Pending",
     paymentStatus: "Unpaid",
-    // paymentAmount,
     additionalNotes,
     invoiceNumber,
   });
@@ -360,9 +345,6 @@ const createillegalDocklessRemoval = asyncHandler(async (req, res) => {
   if (fs.existsSync(deviceIDImagePath)) {
     fs.unlinkSync(deviceIDImagePath);
   }
-  // if (fs.existsSync(unauthorizedParkingImagePath)) {
-  //   fs.unlinkSync(unauthorizedParkingImagePath);
-  // }
 
   const contactInfo = await ContactInfo.find({});
   const emailList = contactInfo.map((info) => info.email);
@@ -406,10 +388,6 @@ const createillegalDocklessRemoval = asyncHandler(async (req, res) => {
 
 const createRedeployment = asyncHandler(async (req, res) => {
   const { operatorName, deviceID, deviceIDImage, additionalNotes } = req.body;
-
-  // if (!doorFlag) {
-  //   throw new ApiError(400, "Door is not opened");
-  // }
 
   const requiredFields = [
     { name: "operatorName", value: operatorName },
@@ -461,8 +439,6 @@ const createRedeployment = asyncHandler(async (req, res) => {
 
   await Promise.all(emailPromises);
 
-  // doorFlag = false;
-
   return res.json(
     new ApiResponse(201, redeployment, "Redeployment created successfully")
   );
@@ -498,11 +474,6 @@ const doorOtp = asyncHandler(async (req, res) => {
   if (!cleaner) {
     throw new ApiError(404, "Cleaner not found");
   }
-
-  // const otp = await sendOtp(cleaner.phone);
-  // if (!otp) {
-  //   throw new ApiError(500, "Failed to send OTP");
-  // }
 
   const otp = generateOtp();
 
