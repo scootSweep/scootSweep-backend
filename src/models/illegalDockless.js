@@ -36,7 +36,7 @@ const illegalDocklessSchema = new mongoose.Schema(
     },
     typeOfDevice: {
       type: String,
-      enum: ["Scooter", "Bike", "Car"],
+      enum: ["Scooter", "Bike", "Car", "eBike", "eScooter", "eCar"],
       required: true,
     },
     deviceID: {
