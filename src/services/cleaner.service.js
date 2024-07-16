@@ -1,6 +1,7 @@
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Cleaner } from "../models/cleaner.model.js";
+import { FeedbackCleaner } from "../models/feedbackCleaner.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { isValidPhoneNumber } from "../utils/validation.js";
 import { sendOtp } from "../services/otp.service.js";
@@ -536,6 +537,39 @@ const getListOfDock = asyncHandler(async (req, res) => {
   );
 });
 
+// feedback for cleaner
+const feedback = asyncHandler(async (req, res) => {
+  const { email, comment } = req.body;
+
+  if (!email || !comment) {
+    throw new ApiError(400, "Email and comment are required");
+  }
+
+  if (!emailRegex.test(email)) {
+    throw new ApiError(400, "Invalid email format");
+  }
+
+  const cleaner = await Cleaner.findOne({ email }); // Find the cleaner by email
+
+  if (!cleaner) {
+    throw new ApiError(404, `Cleaner with ${email} not found`);
+  }
+
+  const feedback = await FeedbackCleaner.create({
+    ownerId: cleaner._id,
+    email,
+    comment,
+  });
+
+  if (!feedback) {
+    throw new ApiError(500, "Error while creating feedback");
+  }
+
+  return res.json(
+    new ApiResponse(201, feedback, "Feedback created successfully")
+  );
+});
+
 const cleanerService = {
   createCleaner,
   verifyContact,
@@ -550,6 +584,7 @@ const cleanerService = {
   verifyMail,
   loginWithEmail,
   getListOfDock,
+  feedback,
 };
 
 export default cleanerService;
