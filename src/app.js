@@ -12,10 +12,12 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use(bodyParser.json());
+// app.use(bodyParser.json());
 app.use(express.json({ limit: "20mb" }));
 app.use(express.urlencoded({ extended: true, limit: "20mb" }));
 app.use(express.static("public"));
+app.use(bodyParser.json({ limit: "50mb" }));
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 app.use(cookieParser());
 
 //routes import
@@ -24,12 +26,14 @@ import healthcheckRouter from "./routes/healthcheck.routes.js";
 import auth from "./routes/auth.routes.js";
 import admin from "./routes/admin.routes.js";
 import cleaner from "./routes/cleaner.routes.js";
+import property from "./routes/property.routes.js";
 
 //routes declaration
 app.use("/api/v1/healthcheck", healthcheckRouter);
 app.use("/api/v1/auth", auth);
 app.use("/api/v1/admin", admin);
 app.use("/api/v1/cleaner", cleaner);
+app.use("/api/v1/property", property);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
