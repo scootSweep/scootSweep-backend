@@ -14,7 +14,7 @@ router
   .post(upload.none(), cleanerService.createillegalDocklessRemoval);
 
 router.route("/list-of-dock").get(cleanerService.getListOfDock);
-
+router.route("/feedback").post(cleanerService.feedback);
 // send otp to open the door
 router.route("/door-otp").post(cleanerService.doorOtp);
 router.route("/verify-door").post(cleanerService.verifyDoorOtp);
