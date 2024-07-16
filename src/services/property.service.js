@@ -1,3 +1,4 @@
+import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { Property } from "../models/property.model.js";
@@ -8,6 +9,7 @@ import { sendEmailForResetPassword } from "../services/mail.service.js";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import path from "path";
+import { FeedbackProperty } from "../models/feedbackProperty.model.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -288,6 +290,38 @@ const resetPassword = async (token, password) => {
   return property;
 };
 
+const feedback = async (req, res) => {
+  const { email, comment } = req.body;
+
+  if (!email || !comment) {
+    throw new ApiError(400, "Email and comment are required");
+  }
+
+  if (!emailRegex.test(email)) {
+    throw new ApiError(400, "Invalid email format");
+  }
+
+  const property = await Property.findOne({ email }); // Find the cleaner by email
+
+  if (!property) {
+    throw new ApiError(404, `Cleaner with ${email} not found`);
+  }
+
+  const feedback = await FeedbackProperty.create({
+    ownerId: property._id,
+    email,
+    comment,
+  });
+
+  if (!feedback) {
+    throw new ApiError(500, "Error while creating feedback");
+  }
+
+  return res.json(
+    new ApiResponse(201, feedback, "Feedback created successfully")
+  );
+};
+
 const propertyService = {
   createProperty,
   verifyContact,
@@ -296,6 +330,7 @@ const propertyService = {
   login,
   forgotPassword,
   resetPassword,
+  feedback,
 };
 
 export default propertyService;
