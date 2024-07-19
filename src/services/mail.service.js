@@ -32,15 +32,20 @@ async function sendEmail(to, subject, template, data) {
     }
 
     const mailOptions = {
-      from: "achintj96244@gmail.com",
+      from: "scootsweep8@gmail.com",
       to,
       subject,
       html,
     };
 
-    const Message = await transporter.sendMail(mailOptions);
+    // const mailOptions = {
+    //   from: "achintj96244@gmail.com",
+    //   to,
+    //   subject,
+    //   html,
+    // };
 
-    console.log("Message", Message);
+    const Message = await transporter.sendMail(mailOptions);
     return Message;
   } catch (err) {
     return err;
