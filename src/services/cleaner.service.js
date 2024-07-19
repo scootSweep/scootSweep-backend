@@ -370,7 +370,7 @@ const createillegalDocklessRemoval = asyncHandler(async (req, res) => {
   await sendEmail(
     email,
     "illegal Dockless Removal",
-    "cleaningInvoice_template",
+    "illegalDockless_template",
     { ...unauthorizedDock.toObject(), violationLocationImage } // Pass the violationLocationImage to the email template
   );
 
