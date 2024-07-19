@@ -21,10 +21,12 @@ async function sendEmail(to, subject, template, data) {
   try {
     const templatePath = join(__dirname, "../views/" + template + ".ejs");
     // Render the EJS template file with the provided data
+    if (!templatePath) {
+      throw new ApiError(500, "Error while rendering email template");
+    }
     const html = await ejs.renderFile(templatePath, data, {
       async: true,
     });
-
     if (!html) {
       throw new ApiError(500, "Error while rendering email template");
     }
@@ -38,6 +40,7 @@ async function sendEmail(to, subject, template, data) {
 
     const Message = await transporter.sendMail(mailOptions);
 
+    console.log("Message", Message);
     return Message;
   } catch (err) {
     return err;
