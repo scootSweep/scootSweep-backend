@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Illegally Dockless Device Removal Authorization</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 20px;
+      }
+      .container {
+        width: 80%;
+        margin: 0 auto;
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .header h1 {
+        margin-bottom: 10px; /* Added spacing below the heading */
+      }
+      .info {
+        border: 1px solid #ccc;
+        padding: 40px;
+        margin-bottom: 20px;
+      }
+      .info p {
+        margin: 10px 10px; /* Added vertical spacing between each paragraph */
+      }
+      .footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 15px;
+      }
+      .signature {
+        margin-left: auto; /* Pushes the signature to the right */
+      }
+      .signature img {
+        max-width: 200px;
+      }
+      .disclaimer {
+        text-align: justify;
+        font-size: 12px;
+        line-height: 1.4;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Dockless Device Removal Authorization</h1>
+      </div>
+      <div class="info">
+        <p><strong>First Name:</strong> <%= property.firstName %></p>
+        <p><strong>Last Name:</strong> <%= property.lastName %></p>
+        <p><strong>Email:</strong> <%= property.email %></p>
+        <p><strong>Phone:</strong> <%= property.phone %></p>
+        <p><strong>Property Name:</strong> <%= property.propertyName %></p>
+        <p>
+          <strong>Property Address:</strong> <%= property.propertyAddress %>
+        </p>
+        <p><strong>City:</strong> <%= property.city %></p>
+        <p><strong>State:</strong> <%= property.state %></p>
+        <p><strong>ZIP Code:</strong> <%= property.zip %></p>
+      </div>
+      <div class="disclaimer">
+        <p>
+          <em
+            >I as Owner or Property Manager request that any and all dockless
+            bikes and/or scooters that are Abandoned, Trespassing, Parked,
+            Displayed, Staged, or otherwise placed on my property, and without
+            my permission, be removed, from my commercial/private property. I
+            warrant that I have full authority as owner to appoint Scoot Sweep
+            LLC as my authorized agent for these purposes and to perform these
+            services on my behalf. In requesting this removal, I understand and
+            agree that the removal of said property (e.g., the device(s)
+            described above) will be made at no cost to me nor will I receive
+            any monetary and/or other form of compensation. I will also inform
+            Scoot Sweep LLC of all property boundaries. I hereby assign to Scoot
+            Sweep, LLC any rights and causes of action we may have as property
+            owners to collect from the scooter companies amounts they may be
+            liable for, including but not limited to reasonable costs of storage
+            and care of the property removed in the past, present or future.</em
+          >
+        </p>
+      </div>
+      <div class="footer">
+        <div>
+          <p>Date: <%= date %></p>
+          <p>Time: <%= time %></p>
+          <p>Submission ID: <%= property._id %></p>
+        </div>
+        <div class="signature">
+          <img src="<%= property.signature %>" alt="Signature" />
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
