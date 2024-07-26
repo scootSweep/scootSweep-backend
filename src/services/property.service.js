@@ -1,12 +1,14 @@
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { uploadOnCloudinary, uploadPDFBuffer } from "../utils/cloudinary.js";
 import { Property } from "../models/property.model.js";
+import puppeteer from "puppeteer";
 import { verifyOtp } from "../services/otp.service.js";
 import { isValidPhoneNumber } from "../utils/validation.js";
 import randomstring from "randomstring";
 import { sendEmailForResetPassword } from "../services/mail.service.js";
 import fs from "fs";
+import ejs from "ejs";
 import { fileURLToPath } from "url";
 import path from "path";
 import { FeedbackProperty } from "../models/feedbackProperty.model.js";
@@ -55,8 +57,6 @@ const createProperty = async (propertyData) => {
   if (missingField) {
     throw new ApiError(400, `Field ${missingField.name} is required`);
   }
-
-  // check account is already exist or not
 
   const propertyExist = await Property.findOne({ $or: [{ email }, { phone }] });
 
@@ -108,6 +108,7 @@ const createProperty = async (propertyData) => {
     phoneVerified: false,
     password,
     isMailVerified: false,
+    pdfUrl: "",
   });
 
   if (fs.existsSync(tempFilePath)) {
@@ -117,6 +118,32 @@ const createProperty = async (propertyData) => {
   if (!property) {
     throw new ApiError(500, "Some went wrong while registering the property");
   }
+
+  const dateTimeString = property.createdAt;
+  const dateObject = new Date(dateTimeString);
+  const date = dateObject.toLocaleDateString();
+  const time = dateObject.toLocaleTimeString();
+
+  const templatePath = path.join(
+    __dirname,
+    "../views/property_location_template.ejs"
+  );
+  console.log("templatePath", templatePath);
+  const htmlContent = await ejs.renderFile(templatePath, {
+    property,
+    date,
+    time,
+  });
+
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.setContent(htmlContent);
+  const pdfBuffer = await page.pdf({ format: "A4" });
+  await browser.close();
+
+  const pdfUploadResult = await uploadPDFBuffer(pdfBuffer);
+  property.pdfUrl = pdfUploadResult;
+  await property.save();
 
   return property;
 };
