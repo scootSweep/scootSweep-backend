@@ -4,7 +4,6 @@ import { Cleaner } from "../models/cleaner.model.js";
 import { FeedbackCleaner } from "../models/feedbackCleaner.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { isValidPhoneNumber } from "../utils/validation.js";
-import { sendOtp } from "../services/otp.service.js";
 import { sendEmail } from "../services/mail.service.js";
 import { generateOtp } from "../services/otp.service.js";
 import { verifyOtp } from "../services/otp.service.js";
@@ -20,7 +19,6 @@ import { isValidObjectId } from "mongoose";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import path from "path";
-import { CallInstance } from "twilio/lib/rest/insights/v1/call.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -516,8 +514,8 @@ const verifyDoorOtp = asyncHandler(async (req, res) => {
   doorFlag = true;
   return res.json(new ApiResponse(200, null, "door is opened successfully"));
 });
-// create a getList of cleaning invoice of a cleaner
 
+// create a getList of cleaning invoice of a cleaner
 const getListOfDock = asyncHandler(async (req, res) => {
   const cleaner = req.cleaner;
   const illegalDockless = await IllegalDockless.find({
