@@ -76,6 +76,9 @@ const propertySchema = new mongoose.Schema(
     refreshToken: {
       type: String,
     },
+    pdfUrl: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
