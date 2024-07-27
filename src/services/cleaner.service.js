@@ -25,6 +25,13 @@ const __dirname = path.dirname(__filename);
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 let doorFlag = false;
 let invoiceNum = 0;
+
+const cookieOptions = {
+  // making the cookie not modifiable by client only sever can modify it
+  httpOnly: true, // Make cookies accessible only via HTTP(S)
+  secure: true, // Ensure cookies are only sent over HTTPS
+};
+
 const createCleaner = async (cleanerData) => {
   const { firstName, lastName, email, phone, DOB, idImage, password } =
     cleanerData;
@@ -568,6 +575,16 @@ const feedback = asyncHandler(async (req, res) => {
   );
 });
 
+const deleteCleaner = asyncHandler(async (req, res) => {
+  await Cleaner.findByIdAndDelete(req.cleaner._id);
+
+  return res
+    .status(200)
+    .clearCookie("accessToken", cookieOptions)
+    .clearCookie("refreshToken", cookieOptions)
+    .json(new ApiResponse(200, {}, "cleaner deleted"));
+});
+
 const cleanerService = {
   createCleaner,
   verifyContact,
@@ -583,6 +600,7 @@ const cleanerService = {
   loginWithEmail,
   getListOfDock,
   feedback,
+  deleteCleaner,
 };
 
 export default cleanerService;
