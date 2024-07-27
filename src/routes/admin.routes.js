@@ -12,6 +12,8 @@ import {
   toggleInvoicePaymentStatus,
   getInvoicePaymentStatusbyId,
   getAllRedeployment,
+  deleteProperty,
+  deleteCleaner,
 } from "../controllers/admin.controller.js";
 import { registerCleaner } from "../controllers/auth.controller.js";
 import { Router } from "express";
@@ -54,5 +56,9 @@ router
 
 // redeployment-routes
 router.route("/redeployment").get(getAllRedeployment);
+
+// delete-property-cleaner
+router.route("/property/:propertyId").delete(deleteProperty);
+router.route("/cleaner/:cleanerId").delete(deleteCleaner);
 
 export default router;
