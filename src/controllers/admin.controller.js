@@ -374,6 +374,38 @@ const getAllRedeployment = asyncHandler(async (req, res) => {
     );
 });
 
+const deleteProperty = asyncHandler(async (req, res) => {
+  const { propertyId } = req.params;
+
+  if (!isValidObjectId(propertyId)) {
+    throw new ApiError(400, "Property id is required");
+  }
+
+  const property = await Property.findByIdAndDelete(propertyId);
+  if (!property) {
+    throw new ApiError(404, `Property with id ${propertyId} not found`);
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, property, "Property deleted successfully"));
+});
+
+const deleteCleaner = asyncHandler(async (req, res) => {
+  const { cleanerId } = req.params;
+
+  if (!isValidObjectId(cleanerId)) {
+    throw new ApiError(400, "Cleaner id is required");
+  }
+
+  const cleaner = await Cleaner.findByIdAndDelete(cleanerId);
+  if (!cleaner) {
+    throw new ApiError(404, `Cleaner with id ${cleanerId} not found`);
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, cleaner, "Cleaner deleted successfully"));
+});
+
 export {
   Dashboard,
   registerCleanerbyAdmin,
@@ -388,4 +420,6 @@ export {
   toggleInvoicePaymentStatus,
   getInvoicePaymentStatusbyId,
   getAllRedeployment,
+  deleteProperty,
+  deleteCleaner,
 };
