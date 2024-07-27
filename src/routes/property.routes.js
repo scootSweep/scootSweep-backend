@@ -5,5 +5,6 @@ import propertyService from "../services/property.service.js";
 const router = Router();
 
 router.route("/feedback").post(verifyProperty, propertyService.feedback);
+router.route("/").delete(verifyProperty, propertyService.deleteProperty);
 
 export default router;
