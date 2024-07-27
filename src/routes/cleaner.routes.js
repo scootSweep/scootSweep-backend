@@ -6,8 +6,8 @@ import { upload } from "../middlewares/multer.middleware.js";
 const router = Router();
 
 router.route("/property-location").get(cleanerService.getAllPropertyLocation);
-
 router.use(verifyCleaner);
+router.route("/").delete(cleanerService.deleteCleaner);
 // router.route("/cleaning-invoice").post(upload.none(), createCleaningInvoice);
 router
   .route("/unauthorized-dock")
