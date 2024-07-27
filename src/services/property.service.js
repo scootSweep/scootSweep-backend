@@ -7,6 +7,7 @@ import { verifyOtp } from "../services/otp.service.js";
 import { isValidPhoneNumber } from "../utils/validation.js";
 import randomstring from "randomstring";
 import { sendEmailForResetPassword } from "../services/mail.service.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 import fs from "fs";
 import ejs from "ejs";
 import { fileURLToPath } from "url";
@@ -14,6 +15,12 @@ import path from "path";
 import { FeedbackProperty } from "../models/feedbackProperty.model.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const cookieOptions = {
+  // making the cookie not modifiable by client only sever can modify it
+  httpOnly: true, // Make cookies accessible only via HTTP(S)
+  secure: true, // Ensure cookies are only sent over HTTPS
+};
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const createProperty = async (propertyData) => {
@@ -317,7 +324,7 @@ const resetPassword = async (token, password) => {
   return property;
 };
 
-const feedback = async (req, res) => {
+const feedback = asyncHandler(async (req, res) => {
   const { email, comment } = req.body;
 
   if (!email || !comment) {
@@ -347,7 +354,17 @@ const feedback = async (req, res) => {
   return res.json(
     new ApiResponse(201, feedback, "Feedback created successfully")
   );
-};
+});
+
+const deleteProperty = asyncHandler(async (req, res) => {
+  await Property.findByIdAndDelete(req.property._id);
+
+  return res
+    .status(200)
+    .clearCookie("accessToken", cookieOptions)
+    .clearCookie("refreshToken", cookieOptions)
+    .json(new ApiResponse(200, {}, "property deleted"));
+});
 
 const propertyService = {
   createProperty,
@@ -358,6 +375,7 @@ const propertyService = {
   forgotPassword,
   resetPassword,
   feedback,
+  deleteProperty,
 };
 
 export default propertyService;
