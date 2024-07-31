@@ -292,6 +292,7 @@ const createillegalDocklessRemoval = asyncHandler(async (req, res) => {
     operatorName,
     deviceID,
     deviceIDImage,
+    unauthorizedParkingImage,
     time,
     date,
     gpsLocation,
@@ -324,10 +325,22 @@ const createillegalDocklessRemoval = asyncHandler(async (req, res) => {
 
   const tempimage = Buffer.from(deviceIDImage, "base64");
   const deviceIDImagePath = path.join(__dirname, "temp_deviceID_image.jpeg");
-
   fs.writeFileSync(deviceIDImagePath, tempimage);
 
+  const tempUnauthorizedParkingImage = Buffer.from(
+    unauthorizedParkingImage,
+    "base64"
+  );
+  const unauthorizedParkingImagePath = path.join(
+    __dirname,
+    "temp_UnauthorizedParking_image.jpeg"
+  );
+  fs.writeFileSync(unauthorizedParkingImagePath, tempUnauthorizedParkingImage);
+
   const deviceIDImageCloudinary = await uploadOnCloudinary(deviceIDImagePath);
+  const unauthorizedParkingImageCloudinary = await uploadOnCloudinary(
+    unauthorizedParkingImagePath
+  );
   const invoiceNumber = await getNextSequenceValue("cleaningInvoice");
 
   const dateParts = date.split("/");
@@ -338,6 +351,7 @@ const createillegalDocklessRemoval = asyncHandler(async (req, res) => {
     operatorName,
     deviceID,
     deviceIDImage: deviceIDImageCloudinary?.url || "",
+    unauthorizedParkingImage: unauthorizedParkingImageCloudinary?.url || "",
     gpsLocation,
     typeOfDevice,
     time,
@@ -350,6 +364,10 @@ const createillegalDocklessRemoval = asyncHandler(async (req, res) => {
 
   if (fs.existsSync(deviceIDImagePath)) {
     fs.unlinkSync(deviceIDImagePath);
+  }
+
+  if (fs.existsSync(unauthorizedParkingImagePath)) {
+    fs.unlinkSync(unauthorizedParkingImagePath);
   }
 
   const contactInfo = await ContactInfo.find({});
