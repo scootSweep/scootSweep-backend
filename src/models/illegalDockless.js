@@ -44,7 +44,7 @@ const illegalDocklessSchema = new mongoose.Schema(
       required: true,
     },
     deviceIDImage: String,
-    // unauthorizedParkingImage: String,
+    unauthorizedParkingImage: String,
     gpsLocation: {
       type: String,
       required: true,
