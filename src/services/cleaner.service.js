@@ -50,7 +50,7 @@ const createCleaner = async (cleanerData) => {
   );
 
   if (missingField) {
-    throw new ApiError(400, `Field ${missingField.name} is required`);
+    throw new ApiError(400, `Oops! The ${missingField.name} is required.`);
   }
 
   const buffer = Buffer.from(idImage, "base64");
@@ -69,11 +69,11 @@ const createCleaner = async (cleanerData) => {
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
-    throw new ApiError(400, "Invalid email format");
+    throw new ApiError(400, "Please enter a valid email address");
   }
 
   if (!isValidPhoneNumber(phone)) {
-    throw new ApiError(400, "Invalid phone number");
+    throw new ApiError(400, "That doesn’t look like a valid phone number");
   }
 
   const [day, month, year] = DOB.split("-");
@@ -81,7 +81,7 @@ const createCleaner = async (cleanerData) => {
 
   // Check if the dateOfBirth is valid
   if (isNaN(dateOfBirth.getTime())) {
-    throw new ApiError(400, "Invalid date of birth");
+    throw new ApiError(400, "Please provide a valid date of birth");
   }
 
   const cleaner = await Cleaner.create({
@@ -119,12 +119,18 @@ const verifyContact = async (details) => {
   }
 
   if (!verifyOtp(otp)) {
-    throw new ApiError(400, "Invalid otp");
+    throw new ApiError(
+      400,
+      "The OTP you entered is incorrect. Please try again"
+    );
   }
   const cleaner = await Cleaner.findOne({ phone: number });
 
   if (!cleaner) {
-    throw new ApiError(404, "Cleaner not found");
+    throw new ApiError(
+      404,
+      "We couldn’t find a cleaner with that information."
+    );
   }
 
   const updatedCleaner = await Cleaner.findByIdAndUpdate(
@@ -149,11 +155,14 @@ const verifyMail = async (cleanerData) => {
   }
 
   if (!emailRegex.test(email)) {
-    throw new ApiError(400, "Invalid email format");
+    throw new ApiError(400, "Please enter a valid email address.");
   }
 
   if (!verifyOtp(otp)) {
-    throw new ApiError(400, "Invalid OTP");
+    throw new ApiError(
+      400,
+      "The OTP you entered is incorrect. Please try again"
+    );
   }
 
   let cleaner = await Cleaner.findOne({
@@ -161,7 +170,7 @@ const verifyMail = async (cleanerData) => {
   });
 
   if (!cleaner) {
-    throw new ApiError(400, "Invalid email");
+    throw new ApiError(400, "email not found");
   }
   if (cleaner.isMailVerified) {
     throw new ApiResponse(400, "Email already verified");
@@ -179,10 +188,10 @@ const loginWithEmail = async (cleanerData) => {
   const { email, password } = cleanerData;
 
   if (!email || !password) {
-    throw new ApiError(400, "All fields are required");
+    throw new ApiError(400, "Please fill out all the required fields.");
   }
   if (!emailRegex.test(email)) {
-    throw new ApiError(400, "Invalid email format");
+    throw new ApiError(400, "Please enter a valid email address.");
   }
 
   const cleaner = await Cleaner.findOne({
@@ -191,11 +200,11 @@ const loginWithEmail = async (cleanerData) => {
   });
 
   if (!cleaner) {
-    throw new ApiError(400, "Invalid email or password");
+    throw new ApiError(400, "The email or password you entered is incorrect");
   }
 
   if (!cleaner.isMailVerified) {
-    throw new ApiError(400, "Email not verified");
+    throw new ApiError(400, "Please verify your email before logging in");
   }
   return cleaner;
 };
@@ -208,11 +217,11 @@ const login = async (details) => {
   }
 
   if (!isValidPhoneNumber(number)) {
-    throw new ApiError(400, "Invalid phone number");
+    throw new ApiError(400, "That doesn’t look like a valid phone number.");
   }
 
   if (!verifyOtp(otp)) {
-    throw new ApiError(400, "Invalid otp");
+    throw new ApiError(400, "otp is invalid");
   }
 
   const cleaner = await Cleaner.findOne({ phone: number }).select(
@@ -220,7 +229,10 @@ const login = async (details) => {
   );
 
   if (!cleaner) {
-    throw new ApiError(404, "Cleaner not found");
+    throw new ApiError(
+      404,
+      "We couldn’t find a cleaner with that information."
+    );
   }
 
   return cleaner;
@@ -230,13 +242,16 @@ const forgotPassword = async (details) => {
   const { email } = details;
 
   if (!email || !emailRegex.test(email)) {
-    throw new ApiError(400, "Invalid email");
+    throw new ApiError(400, "Please enter a valid email address.");
   }
 
   const cleaner = await Cleaner.findOne({ email }).select("-refreshToken");
 
   if (!cleaner) {
-    throw new ApiError(404, "cleaner not found");
+    throw new ApiError(
+      404,
+      "We couldn’t find a cleaner with that information."
+    );
   }
 
   const token = randomstring.generate();
@@ -251,7 +266,10 @@ const forgotPassword = async (details) => {
   );
 
   if (!mail) {
-    throw new ApiError(500, "Error while sending email");
+    throw new ApiError(
+      500,
+      "Something went wrong while sending email. Please try again"
+    );
   }
 
   return cleaner;
@@ -265,7 +283,7 @@ const resetPassword = async (token, password) => {
   const cleaner = await Cleaner.findOne({ token }).select("-refreshToken");
 
   if (!cleaner) {
-    throw new ApiError(404, "Cleaner not found");
+    throw new ApiError(404, "We couldn’t find the cleaner for password reset.");
   }
 
   cleaner.password = password;
@@ -279,7 +297,9 @@ const getAllPropertyLocation = asyncHandler(async (req, res) => {
   const properties = await Property.find().select("-refreshToken ");
 
   if (!properties) {
-    throw new ApiError(404, "Properties not found");
+    return res
+      .status(200)
+      .json(new ApiResponse(200, [], "Properties not found"));
   }
 
   return res
@@ -320,7 +340,7 @@ const createillegalDocklessRemoval = asyncHandler(async (req, res) => {
   );
 
   if (missingField) {
-    throw new ApiError(400, `Field ${missingField.name} is required`);
+    throw new ApiError(400, `Oops! The ${missingField.name} is required`);
   }
 
   const tempimage = Buffer.from(deviceIDImage, "base64");
@@ -398,7 +418,7 @@ const createillegalDocklessRemoval = asyncHandler(async (req, res) => {
   );
 
   if (!unauthorizedDock) {
-    throw new ApiError(500, "Failed to create cleaning invoice");
+    throw new ApiError(500, "Failed to create illegal Dockless Removal");
   }
 
   return res.json(
@@ -496,7 +516,10 @@ const doorOtp = asyncHandler(async (req, res) => {
 
   const cleaner = await Cleaner.findById(req.cleaner._id).select("email");
   if (!cleaner) {
-    throw new ApiError(404, "Cleaner not found");
+    throw new ApiError(
+      404,
+      "We couldn’t find a cleaner with that information."
+    );
   }
 
   const otp = generateOtp();
@@ -534,7 +557,10 @@ const verifyDoorOtp = asyncHandler(async (req, res) => {
   }
 
   if (!verifyOtp(otp)) {
-    throw new ApiError(400, "Invalid otp");
+    throw new ApiError(
+      400,
+      "The OTP you entered is incorrect. Please try again"
+    );
   }
   doorFlag = true;
   return res.json(new ApiResponse(200, null, "door is opened successfully"));
@@ -569,7 +595,7 @@ const feedback = asyncHandler(async (req, res) => {
   }
 
   if (!emailRegex.test(email)) {
-    throw new ApiError(400, "Invalid email format");
+    throw new ApiError(400, "Please enter a valid email address.");
   }
 
   const cleaner = await Cleaner.findOne({ email }); // Find the cleaner by email
