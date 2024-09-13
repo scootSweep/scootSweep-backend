@@ -99,6 +99,8 @@ const createProperty = async (propertyData) => {
     throw new ApiError(400, "Invalid role");
   }
 
+  const normalizedEmail = email.toLowerCase();
+
   const property = await Property.create({
     propertyName,
     propertyAddress,
@@ -109,7 +111,7 @@ const createProperty = async (propertyData) => {
     firstName,
     lastName,
     role,
-    email,
+    email: normalizedEmail,
     signature: signature_img.url,
     phone,
     phoneVerified: false,
@@ -205,8 +207,9 @@ const verifyMail = async (propertyData) => {
     throw new ApiError(400, "Invalid OTP");
   }
 
+  const normalizedEmail = email.toLowerCase();
   let property = await Property.findOne({
-    email,
+    email: normalizedEmail,
   });
 
   if (!property) {
@@ -236,13 +239,14 @@ const loginWithEmail = async (propertyData) => {
     throw new ApiError(400, "Invalid email format");
   }
 
+  const normalizedEmail = email.toLowerCase();
   const property = await Property.findOne({
-    email,
+    email: normalizedEmail,
     password,
   });
 
   if (!property) {
-    throw new ApiError(400, "Invalid email or password");
+    throw new ApiError(400, "The email or password you entered is incorrect.");
   }
 
   if (!property.isMailVerified) {
@@ -285,10 +289,13 @@ const forgotPassword = async (details) => {
     throw new ApiError(400, "Invalid email format");
   }
 
-  const property = await Property.findOne({ email }).select("-refreshToken");
+  const normalizedEmail = email.toLowerCase();
+  const property = await Property.findOne({ email: normalizedEmail }).select(
+    "-refreshToken"
+  );
 
   if (!property) {
-    throw new ApiError(404, "Property not found");
+    throw new ApiError(404, "Property not found.");
   }
 
   const token = randomstring.generate();

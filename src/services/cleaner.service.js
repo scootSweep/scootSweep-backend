@@ -84,11 +84,12 @@ const createCleaner = async (cleanerData) => {
     throw new ApiError(400, "Please provide a valid date of birth");
   }
 
+  const normalizedEmail = email.toLowerCase();
   const cleaner = await Cleaner.create({
     firstName,
     lastName,
     dateOfBirth: dateOfBirth,
-    email,
+    email: normalizedEmail,
     password,
     phone,
     phoneVerified: false,
@@ -165,21 +166,22 @@ const verifyMail = async (cleanerData) => {
     );
   }
 
+  const normalizedEmail = email.toLowerCase();
   let cleaner = await Cleaner.findOne({
-    email,
+    email: normalizedEmail,
   });
 
   if (!cleaner) {
     throw new ApiError(400, "email not found");
   }
-  if (cleaner.isMailVerified) {
+  if (cleaner.isMailVerified == true) {
     throw new ApiResponse(400, "Email already verified");
   }
 
   cleaner.isMailVerified = true;
 
   await cleaner.save();
-  // Now, perform a new query to retrieve the updated admin data without password and refreshToken
+  //to retrieve the updated admin data without password and refreshToken
   cleaner = await Cleaner.findOne({ email }).select("-password -refreshToken");
   return cleaner;
 };
@@ -194,13 +196,14 @@ const loginWithEmail = async (cleanerData) => {
     throw new ApiError(400, "Please enter a valid email address.");
   }
 
+  const normalizedEmail = email.toLowerCase();
   const cleaner = await Cleaner.findOne({
-    email,
-    password,
+    email: normalizedEmail,
+    password: password,
   });
 
   if (!cleaner) {
-    throw new ApiError(400, "The email or password you entered is incorrect");
+    throw new ApiError(400, "The email or password you entered is incorrect.");
   }
 
   if (!cleaner.isMailVerified) {
