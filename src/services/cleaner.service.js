@@ -167,6 +167,15 @@ const verifyMail = async (cleanerData) => {
   }
 
   const normalizedEmail = email.toLowerCase();
+
+  const isExist = await Cleaner.findOne({
+    email: normalizedEmail,
+  });
+
+  if (!isExist) {
+    throw new ApiError(400, `Cleaner with ${email} not found`);
+  }
+
   let cleaner = await Cleaner.findOne({
     email: normalizedEmail,
   });
@@ -197,6 +206,15 @@ const loginWithEmail = async (cleanerData) => {
   }
 
   const normalizedEmail = email.toLowerCase();
+
+  const isExist = await Cleaner.findOne({
+    email: normalizedEmail,
+  });
+
+  if (!isExist) {
+    throw new ApiError(400, `Cleaner with ${email} not found`);
+  }
+
   const cleaner = await Cleaner.findOne({
     email: normalizedEmail,
     password: password,
@@ -246,6 +264,14 @@ const forgotPassword = async (details) => {
 
   if (!email || !emailRegex.test(email)) {
     throw new ApiError(400, "Please enter a valid email address.");
+  }
+
+  const isExist = await Cleaner.findOne({
+    email: normalizedEmail,
+  });
+
+  if (!isExist) {
+    throw new ApiError(400, `Cleaner with ${email} not found`);
   }
 
   const cleaner = await Cleaner.findOne({ email }).select("-refreshToken");
