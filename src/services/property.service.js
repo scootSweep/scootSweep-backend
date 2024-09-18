@@ -213,7 +213,7 @@ const verifyMail = async (propertyData) => {
   });
 
   if (!property) {
-    throw new ApiError(400, "Invalid email");
+    throw new ApiError(400, `Property with ${email} not found`);
   }
   if (property.isMailVerified) {
     throw new ApiResponse(400, "Email already verified");
@@ -240,6 +240,15 @@ const loginWithEmail = async (propertyData) => {
   }
 
   const normalizedEmail = email.toLowerCase();
+
+  const isExist = await Property.findOne({
+    email: normalizedEmail,
+  });
+
+  if (!isExist) {
+    throw new ApiError(400, `Property with ${email} not found`);
+  }
+
   const property = await Property.findOne({
     email: normalizedEmail,
     password,
@@ -274,7 +283,7 @@ const login = async (details) => {
   );
 
   if (!property) {
-    throw new ApiError(404, "Property not found");
+    throw new ApiError(400, `Property with ${email} not found`);
   }
 
   return property;
@@ -290,12 +299,13 @@ const forgotPassword = async (details) => {
   }
 
   const normalizedEmail = email.toLowerCase();
+
   const property = await Property.findOne({ email: normalizedEmail }).select(
     "-refreshToken"
   );
 
   if (!property) {
-    throw new ApiError(404, "Property not found.");
+    throw new ApiError(400, `Property with ${email} not found`);
   }
 
   const token = randomstring.generate();
@@ -344,10 +354,11 @@ const feedback = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid email format");
   }
 
-  const property = await Property.findOne({ email }); // Find the cleaner by email
+  const normalizedEmail = email.toLowerCase();
+  const property = await Property.findOne({ email: normalizedEmail });
 
   if (!property) {
-    throw new ApiError(404, `Cleaner with ${email} not found`);
+    throw new ApiError(400, `Property with ${email} not found`);
   }
 
   const feedback = await FeedbackProperty.create({
